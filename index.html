@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Data Flow - Home</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            color: #334155;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        /* --- V4: Full Navigation Bar --- */
+        .nav-bar {
+            max-width: 1200px;
+            margin: 0 auto 20px auto;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+        .nav-link {
+            text-decoration: none;
+            color: #334155;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+        .nav-link:hover {
+            background: #e0e7ff;
+            color: #1e3a8a;
+        }
+        /* Style for the current, active page */
+        .nav-link.active {
+            background: #1e3a8a;
+            color: white;
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3);
+        }
+        .nav-link.disabled {
+            color: #94a3b8;
+            background: #f1f5f9;
+            pointer-events: none;
+        }
+
+        /* --- V4: Enhanced Header --- */
+        .header {
+            text-align: center;
+            padding: 50px 40px;
+            /* Enhanced gradient */
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            border-radius: 12px 12px 0 0; /* Match container */
+        }
+        .header h1 { 
+            font-size: 2.8em; 
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .header p { 
+            font-size: 1.2em; 
+            color: #e0e7ff;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px 40px;
+            display: flex;
+            gap: 40px;
+        }
+        .main-content {
+            flex: 2;
+        }
+        .sidebar {
+            flex: 1;
+        }
+        .content h2 {
+            font-size: 1.8em;
+            color: #1e3a8a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .content h3 {
+            font-size: 1.3em;
+            color: #1e3a8a;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .content p {
+            font-size: 1em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        .content li {
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        
+        /* --- V4: Enhanced Legend Box --- */
+        .legend-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .legend-swatch {
+            width: 60px;
+            height: 35px;
+            border-radius: 8px;
+            border: 3px solid;
+            flex-shrink: 0;
+            background-clip: padding-box; /* Ensures background is inside border */
+        }
+        .legend-text strong {
+            display: block;
+            color: #1e3a8a;
+            font-size: 1.05em;
+        }
+        .legend-text span {
+            font-size: 0.9em;
+            font-style: italic;
+            color: #475569;
+        }
+
+        /* Swatch Colors */
+        .swatch-master { background: #40a9ff33; border-color: #40a9ff; }
+        .swatch-staging { background: #73d13d33; border-color: #73d13d; }
+        .swatch-doc { background: #9254de33; border-color: #9254de; }
+        .swatch-doc-draft { background: #9254de22; border-color: #9254de; border-style: dashed; }
+        .swatch-event { background: #ffc53d33; border-color: #ffc53d; }
+        .swatch-external { background: #ff7a4533; border-color: #ff7a45; border-style: dashed; }
+
+        /* Badges */
+        .badge {
+            display: inline-block; padding: 3px 9px;
+            border-radius: 6px; font-size: 0.85em; font-weight: 700;
+        }
+        .badge-h { background: #dbeafe; color: #1e40af; }
+        .badge-a { background: #fef3c7; color: #92400e; }
+
+        /* Navigation */
+        .nav-footer {
+            text-align: center;
+            padding: 30px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            border-radius: 0 0 16px 16px; /* Match container */
+        }
+        .nav-button {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-weight: 600;
+            padding: 15px 30px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .nav-button:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- --- V4: Full Navigation Bar --- -->
+    <div class="nav-bar">
+        <div class="nav-links">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="module1.html" class="nav-link"><i class="fas fa-calendar-alt"></i> M1: Planning</a>
+            <a href="module2.html" class="nav-link"><i class="fas fa-shopping-cart"></i> M2: Procurement</a>
+            <a href="module3.html" class="nav-link"><i class="fas fa-balance-scale"></i> M3: Balancing</a>
+            <a href="module4.html" class="nav-link"><i class="fas fa-truck-loading"></i> M4: Inbound</a>
+            <a href="module5.html" class="nav-link"><i class="fas fa-warehouse"></i> M5: Inventory</a>
+            <a href="module6.html" class="nav-link"><i class="fas fa-clipboard-check"></i> M6: Control</a>
+            <a href="module7.html" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> M7: Finance</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Supply Chain P2P Data Flow</h1>
+            <p>An interactive visualization of the Procure-to-Pay data model</p>
+        </div>
+
+        <div class="content">
+            <div class="main-content">
+                <h2>📖 Logic Documentation</h2>
+                <p>This documentation explains the core logic, strategies, and rationale behind the data flow model.</p>
+                
+                <h3>1. Scope & Purpose</h3>
+                <p>This model visualizes the "To-Be" (Phase 2) Procure-to-Pay (P2P) process. It is designed to track material requirements from planning through to payment, emphasizing data integrity, audibility, and the separation of transactional processes from master data.</p>
+
+                <h3>2. Core Logic: The "Transformation Pattern"</h3>
+                <p>A standardized pattern is used for any process involving offline user work (like Excel). This ensures data is validated before corrupting final tables.</p>
+                <ul>
+                    <li><strong>Draft Document:</strong> A user's initial request (e.g., `Bom_Order_List_Draft`).</li>
+                    <li><strong>Offline Event:</strong> The user downloads the draft, enriches it offline (e.g., `Select_BOM_Update`).</li>
+                    <li><strong>Staging Table:</strong> The enriched file is uploaded to a temporary table (e.g., `Bom_Order_List_Staging`).</li>
+                    <li><strong>Validation:</strong> The system runs automated checks on the staging table (e.g., "Does this supplier exist?").</li>
+                    <li><strong>Final Document:</strong> If valid, data is moved to the permanent, auditable table (e.g., `Bom_Order_List_Final`).</li>
+                </ul>
+
+                <h3>3. Key Architectural Modifiers</h3>
+                <ul>
+                    <li><span class="badge badge-h">[H]</span> <strong>Tracks History (SCD2):</strong> Applied to master data (`Supplier_Information`) and key auditable documents (`Purchase_Order`). It means we never delete or overwrite records; we expire old ones and create new ones.</li>
+                    <li><span class="badge badge-a">[A]</span> <strong>Aggregated / Calculated:</strong> This is not a table, but a *view* or *calculation*. `Stock_Data` is an aggregated sum of all movements in the `Stock_Ledger`.</li>
+                </ul>
+
+                <h3>4. Module-Specific Rationale</h3>
+                <ul>
+                    <li><strong>M1. Sourcing in Planning:</strong> Sourcing (Supplier & Price selection) is intentionally done during the `Select_BOM_Update` (Planning) step. This locks in the supplier and price *before* the Purchase Request is even created, streamlining M2.</li>
+                    <li><strong>M2. Decoupled Procurement:</strong> M2 is a chain of these transformation patterns. This decouples the "Net Demand" (from M1) from the final "Purchase Order," allowing for PR consolidation and review.</li>
+                    <li><strong>M4. Perpetual Inventory:</strong> The `Stock_Ledger` is the single source of truth for all quantity changes. Every event (Receipt, Issue, Return, Adjustment) *must* post a transaction to the ledger.</li>
+                </ul>
+            </div>
+            
+            <div class="sidebar">
+                <h2>Legend</h2>
+                <div class="legend-box">
+                    <div class="legend-item">
+                        <div class="legend-swatch swatch-master"></div>
+                        <div class="legend-text"><strong>Master Data</strong><span>Long-lived, core business data.</span></div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-swatch swatch-staging"></div>
+                        <div class="legend-text"><strong>Staging Data</strong><span>Transient, for validation.</span></div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-swatch swatch-doc-draft"></div>
+                        <div class="legend-text"><strong>Draft Document</strong><span>An initial, un-approved request.</span></div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-swatch swatch-doc"></div>
+                        <div class="legend-text"><strong>Final Document</strong><span>Auditable, permanent record.</span></div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-swatch swatch-event"></div>
+                        <div class="legend-text"><strong>Business Event</strong><span>A process, calculation, or offline action.</span></div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-swatch swatch-external"></div>
+                        <div class="legend-text"><strong>External Data</strong><span>Data originating outside our system.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-footer">
+            <a href="module1.html" class="nav-button">Start Flow: Module 1 ➔</a>
+        </div>
+    </div>
+</body>
+</html>

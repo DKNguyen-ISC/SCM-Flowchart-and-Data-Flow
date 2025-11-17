@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Flow - M5: Inventory Movements</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #dbeafe;
+            
+            /* Mermaid Colors */
+            --secondary: #9562dc; /* Purple (transaction_document) */
+            --accent: #fbc14e; /* Gold (transaction_event) */
+            --success: #7dd253; /* Green (staging) */
+            --m4-theme: #f063b0; /* Pink (decision) */
+            --m5-theme: #828282; /* Grey (log) - M5 Theme */
+            --error: #ff797b; /* Red (external) */
+            
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            
+            --border-radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 20px;
+            color: var(--gray-800);
+        }
+
+        /* --- Navigation Bar (v14.0 Structure) --- */
+        .nav-bar {
+            max-width: 1440px;
+            margin: 0 auto 20px auto;
+            padding: 15px 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 20px;
+            z-index: 1000;
+        }
+        .nav-links { display: flex; flex-wrap: wrap; gap: 10px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--gray-700);
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: var(--transition);
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-link:hover { background: var(--primary-light); color: var(--primary-dark); }
+        .nav-link.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3); }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-dark);
+        }
+        .page-header h1 { 
+            font-size: 2.8em; 
+            margin-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .process-description {
+            max-width: 1440px;
+            margin: 0 auto 30px auto;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px 25px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--m5-theme); /* M5 Accent (Grey) */
+        }
+        .process-description h4 {
+            color: var(--m5-theme);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .process-description p { font-size: 0.95em; color: var(--gray-600); line-height: 1.6; }
+
+        .module-container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .process-step {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        /* --- Mermaid-inspired step colors & naming --- */
+        .process-step.step-doc { border-top: 5px solid var(--secondary); } /* Purple */
+        .process-step.step-event { border-top: 5px solid var(--accent); } /* Gold/Yellow */
+        .process-step.step-log { border-top: 5px solid var(--m5-theme); } /* Grey */
+        .process-step.step-master { border-top: 5px solid var(--primary); } /* Blue */
+
+
+        .process-step h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* Icon Colors to match step type */
+        .process-step.step-doc h2 i { color: var(--secondary); }
+        .process-step.step-event h2 i { color: var(--accent); }
+        .process-step.step-log h2 i { color: var(--m5-theme); }
+        .process-step.step-master h2 i { color: var(--primary); }
+
+
+        .process-step > p {
+            font-size: 0.95em;
+            color: var(--gray-600);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            max-width: 900px;
+        }
+        
+        .vertical-separator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0px auto 25px auto;
+            color: var(--gray-400);
+        }
+        .vertical-separator i { font-size: 1.5rem; }
+        .vertical-separator span {
+            font-size: 0.9em; 
+            color: var(--gray-700);
+            background: white; 
+            padding: 5px 10px;
+            border-radius: 6px;
+            box-shadow: var(--shadow);
+            white-space: nowrap;
+            margin-top: 10px;
+        }
+        
+        /* --- Two-Path Layout --- */
+        .path-container {
+            display: flex;
+            gap: 25px;
+        }
+        .path-column {
+            flex: 1;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            padding: 20px;
+            border-radius: var(--border-radius);
+        }
+        .path-column h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .path-column.fail-path h3 i { color: var(--error); }
+        .path-column.pass-path h3 i { color: var(--success); }
+
+
+        /* --- Data Table Styling --- */
+        .data-table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .data-table {
+            width: 100%;
+            font-size: 0.85em;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            background: var(--gray-100); /* Darker for path-bg */
+            padding: 10px 8px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--gray-200);
+            font-size: 0.8em;
+            color: var(--gray-700);
+            position: sticky; top: 0; z-index: 1;
+            white-space: nowrap;
+            text-align: left;
+        }
+        .data-table td {
+            padding: 8px 8px;
+            border-bottom: 1px solid var(--gray-200);
+            background: white;
+            white-space: nowrap; 
+        }
+        .data-table tr:hover td { background: var(--primary-light); }
+        
+        .key-label { 
+            font-size: 0.75rem; font-weight: 600; display: inline-block; 
+            margin-left: 4px; padding: 2px 6px; border-radius: 4px;
+        }
+        .key-label.pk { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
+        .key-label.fk { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+        
+        .row-count {
+            font-size: 0.85em; color: var(--gray-500);
+            margin-top: 15px; font-style: italic;
+            text-align: right;
+        }
+
+        .legend-bottom {
+            margin: 25px 0; padding: 24px; 
+            background: white; border-radius: var(--border-radius); 
+            box-shadow: var(--shadow);
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <div class="nav-links">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="module1.html" class="nav-link"><i class="fas fa-calendar-alt"></i> M1: Planning</a>
+            <a href="module2.html" class="nav-link"><i class="fas fa-shopping-cart"></i> M2: Procurement</a>
+            <a href="module3.html" class="nav-link"><i class="fas fa-balance-scale"></i> M3: Balancing</a>
+            <a href="module4.html" class="nav-link"><i class="fas fa-truck-loading"></i> M4: Inbound</a>
+            <a href="module5.html" class="nav-link"><i class="fas fa-warehouse"></i> M5: Inventory</a>
+            <a href="module6.html" class="nav-link"><i class="fas fa-clipboard-check"></i> M6: Control</a>
+            <a href="module7.html" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> M7: Finance</a>
+        </div>
+    </div>
+
+    <div class="page-header">
+        <h1><i class="fas fa-warehouse" style="color: var(--m5-theme);"></i> MODULE 5: INVENTORY MOVEMENTS</h1>
+    </div>
+
+    <div class="process-description">
+        <h4><i class="fas fa-info-circle"></i> Process Overview (v14.0)</h4>
+        <p>This module executes the "day-to-day" inventory transactions. It is triggered by the **`QC_Decision`** from Module 4 and follows two distinct paths (Pass/Fail).
+        <br><strong>Key Logic:</strong> Every physical movement (Receipt, Quarantine, Transfer, Return) is recorded in the **`Stock_Ledger`**, which in turn updates the master **`Stock_Data`** (L1) for the M3 Balancing Hub to use.</p>
+    </div>
+
+    <div class="module-container">
+
+        <div class="process-step step-event">
+            <h2><i class="fas fa-play-circle"></i> 1. Trigger: QC_Decision (from M4)</h2>
+            <p>This module "wakes up" when M4's `QC_Decision` gateway sends it new data. We will use the same exception scenario from Module 4 for PO-100, Line 3 (`BOM_UPDATE: 300010406C`).
+            <br>
+            - **Input 1 (Pass):** 24,500 units triggered the `Material_Receipt` flow.
+            <br>
+            - **Input 2 (Fail):** 500 units triggered the `Stock_Quarantine` flow.</p>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Process forks into two paths</span>
+        </div>
+
+        <div class="path-container">
+            <div class="path-column fail-path">
+                <h3><i class="fas fa-times-circle"></i> Path A: The "Fail" Flow</h3>
+                
+                <p><strong>Step 2a: `Stock_Quarantine` (Event)</strong></p>
+                <p style="font-size: 0.9em; color: var(--gray-600);">The 500 failed units are logged and moved to a quarantine bin. Their status is `On Hand (Quarantined)`, making them unavailable for M3 planning.</p>
+                <div class="data-table-container">
+                    <table class="data-table" id="table-quarantine"></table>
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Step 2b: `Return_To_Supplier` (Document)</strong></p>
+                <p style="font-size: 0.9em; color: var(--gray-600);">This document is created to process the return. It sends a feedback update to `Purchase_Order` (M2) to record a "Rejected Qty" of 500. This is also used by M7 (Finance) to block payment for these units.</p>
+                <div class="data-table-container">
+                    <table class="data-table" id="table-return"></table>
+                </div>
+            </div>
+
+            <div class="path-column pass-path">
+                <h3><i class="fas fa-check-circle"></i> Path B: The "Pass" Flow</h3>
+
+                <p><strong>Step 3a: `Material_Receipt` (Event)</strong></p>
+                <p style="font-size: 0.9em; color: var(--gray-600);">The 24,500 passed units are officially received. This event sends the *final* "Accepted Qty" feedback to `Purchase_Order` (M2), which M7 (Finance) needs for the 3-Way Match.</p>
+                <div class="data-table-container">
+                    <table class="data-table" id="table-receipt"></table>
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Step 3b: `Stock_Transfer` (Event)</strong></p>
+                <p style="font-size: 0.9em; color: var(--gray-600);">This `Material_Receipt` immediately triggers an internal task to "put away" the items, moving them from the temporary QC bin to a final, permanent storage bin (`BIN_A-01`).</p>
+                <div class="data-table-container">
+                    <table class="data-table" id="table-transfer"></table>
+                </div>
+            </div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>All movements are posted to the central ledger</span>
+        </div>
+        
+        <div class="process-step step-log">
+            <h2><i class="fas fa-book"></i> 4. Stock_Ledger (The "Bank Statement")</h2>
+            <p>This is the **"Heart of M5"**. The `Stock_Ledger` is the immutable, chronological log of *all* inventory movements. It's like a bank statement for our warehouse. Notice the "debits" and "credits" that move our 25,000 units through the system.</p>
+            <div class="data-table-container">
+                <table class="data-table" id="table-ledger"></table>
+            </div>
+            <div class="row-count" id="rc-ledger">...</div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>The ledger updates the Master Data in real-time</span>
+        </div>
+
+        <div class="process-step step-master">
+            <h2><i class="fas fa-database"></i> 5. Final Output: `Stock_Data` (Master) is Updated</h2>
+            <p>This is the **final result of Module 5**. The `Stock_Ledger` (a log) constantly aggregates its data to update the `Stock_Data` (a master table) from Layer 1.
+            <br>This table shows the *current state* of our inventory. The **M3 Balancing Hub** will read this "Available Qty" of 24,500 the next time it runs, completing the entire closed-loop P2P cycle.</p>
+            <div class="data-table-container" style="max-height: 200px;">
+                <table class="data-table" id="table-stock-data"></table>
+            </div>
+        </div>
+
+    </div> <script>
+        // 1. ALL DATA IS STORED HERE
+        const tsvData = {
+            // Path A: Fail
+            quarantine: `
+QUARANTINE_ID	PO_LINE_ID	BOM_UPDATE	QTY	REASON	LOCATION	STATUS
+Q-501	3	300010406C	500.00	Damaged	QUARANTINE_BIN	On Hand (Quarantined)
+            `,
+            returnToSupplier: `
+RETURN_ID	QUARANTINE_ID	PO_LINE_ID	BOM_UPDATE	QTY	STATUS
+RTS-101	Q-501	3	300010406C	500.00	Closed (Returned)
+            `,
+            // Path B: Pass
+            materialReceipt: `
+RECEIPT_ID	PO_LINE_ID	BOM_UPDATE	QTY	LOCATION	STATUS
+MR-801	3	300010406C	24500.00	QC_BIN	On Hand (Awaiting Put-Away)
+            `,
+            stockTransfer: `
+TRANSFER_ID	RECEIPT_ID	BOM_UPDATE	QTY	FROM_LOCATION	TO_LOCATION
+T-901	MR-801	300010406C	24500.00	QC_BIN	BIN_A-01
+            `,
+            // Step 4: The Ledger (showing all movements)
+            stockLedger: `
+LEDGER_ID	TIMESTAMP	PO_LINE_ID	BOM_UPDATE	QTY_CHANGE	LOCATION	EVENT_TYPE
+L-1001	18-Dec 10:30	3	300010406C	+24500.00	QC_BIN	Material_Receipt
+L-1002	18-Dec 10:31	3	300010406C	+500.00	QUARANTINE_BIN	Stock_Quarantine
+L-1003	18-Dec 11:15	3	300010406C	-24500.00	QC_BIN	Stock_Transfer (Out)
+L-1004	18-Dec 11:16	3	300010406C	+24500.00	BIN_A-01	Stock_Transfer (In)
+L-1005	19-Dec 09:00	3	300010406C	-500.00	QUARANTINE_BIN	Return_To_Supplier
+            `,
+            // Step 5: The Final Result
+            stockData: `
+BOM_UPDATE	LOCATION	Available_Qty	Quarantined_Qty
+20001816	BIN_B-04	72.42	0
+300010406C	BIN_A-01	24500.00	0
+300010406C	BIN_C-12	6000.00	0
+40001000A	BIN_D-01	2000.00	0
+            `
+        };
+
+        /**
+         * HELPER FUNCTION to render a full table (header + body)
+         */
+        function renderTable(tableId, tsvString, headers, keyConfig, rowCountId, totalRecords) {
+            const tableEl = document.getElementById(tableId);
+            const rowCountEl = document.getElementById(rowCountId);
+            if (!tableEl) return;
+
+            const { data } = parseTSV(tsvString);
+            const displayHeaders = headers;
+            
+            // Generate Header
+            let thead = '<thead><tr>';
+            displayHeaders.forEach(header => {
+                let keyLabel = '';
+                if (keyConfig.pk && keyConfig.pk.includes(header)) keyLabel = ' <span class="key-label pk">(PK)</span>';
+                if (keyConfig.fk && keyConfig.fk.includes(header)) keyLabel = ' <span class="key-label fk">(FK)</span>';
+                
+                let headerText = header.replace(/_/g, ' ');
+                thead += `<th scope="col">${headerText}${keyLabel}</th>`;
+            });
+            thead += '</tr></thead>';
+
+            // Generate Body
+            let tbody = '<tbody>';
+            data.forEach(row => {
+                tbody += `<tr>`;
+                displayHeaders.forEach(header => {
+                    let cellData = row[header] || '';
+                    tbody += `<td>${cellData}</td>`;
+                });
+                tbody += '</tr>';
+            });
+            tbody += '</tbody>';
+
+            // Render table
+            tableEl.innerHTML = thead + tbody;
+
+            // Update row count
+            if (rowCountEl) {
+                const total = totalRecords || data.length;
+                rowCountEl.innerText = `Showing ${data.length} of ${total} records`;
+            }
+        }
+        
+        // Helper to parse TSV
+        function parseTSV(tsv) {
+            const lines = tsv.trim().split('\n');
+            const headers = tsv.trim().split('\n')[0].split('\t').map(h => h.trim());
+            
+            const data = lines.slice(1).map(line => {
+                const values = line.split('\t').map(v => v.trim());
+                const obj = {};
+                headers.forEach((header, i) => {
+                    obj[header] = values[i] ? values[i].replace(/"/g, '') : '';
+                });
+                return obj;
+            });
+            return { headers, data };
+        }
+
+        // 4. RENDER ALL TABLES ON PAGE LOAD
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            renderTable('table-quarantine', tsvData.quarantine, 
+                ['QUARANTINE_ID', 'PO_LINE_ID', 'BOM_UPDATE', 'QTY', 'REASON', 'LOCATION', 'STATUS'], 
+                { pk: ['QUARANTINE_ID'], fk: ['PO_LINE_ID', 'BOM_UPDATE'] });
+
+            renderTable('table-return', tsvData.returnToSupplier,
+                ['RETURN_ID', 'QUARANTINE_ID', 'PO_LINE_ID', 'BOM_UPDATE', 'QTY', 'STATUS'],
+                { pk: ['RETURN_ID'], fk: ['QUARANTINE_ID', 'PO_LINE_ID', 'BOM_UPDATE'] });
+
+            renderTable('table-receipt', tsvData.materialReceipt,
+                ['RECEIPT_ID', 'PO_LINE_ID', 'BOM_UPDATE', 'QTY', 'LOCATION', 'STATUS'],
+                { pk: ['RECEIPT_ID'], fk: ['PO_LINE_ID', 'BOM_UPDATE'] });
+            
+            renderTable('table-transfer', tsvData.stockTransfer,
+                ['TRANSFER_ID', 'RECEIPT_ID', 'BOM_UPDATE', 'QTY', 'FROM_LOCATION', 'TO_LOCATION'],
+                { pk: ['TRANSFER_ID'], fk: ['RECEIPT_ID', 'BOM_UPDATE'] });
+
+            renderTable('table-ledger', tsvData.stockLedger,
+                ['LEDGER_ID', 'TIMESTAMP', 'PO_LINE_ID', 'BOM_UPDATE', 'QTY_CHANGE', 'LOCATION', 'EVENT_TYPE'],
+                { pk: ['LEDGER_ID'], fk: ['PO_LINE_ID', 'BOM_UPDATE'] }, 'rc-ledger', 5);
+
+            renderTable('table-stock-data', tsvData.stockData,
+                ['BOM_UPDATE', 'LOCATION', 'Available_Qty', 'Quarantined_Qty'],
+                { pk: ['BOM_UPDATE', 'LOCATION'] });
+        });
+
+    </script>
+
+</body>
+</html>

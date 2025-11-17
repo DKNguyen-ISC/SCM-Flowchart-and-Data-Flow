@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Flow - M2: Procurement</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #dbeafe;
+            
+            /* Mermaid Colors */
+            --secondary: #9562dc; /* Purple (transaction_document) */
+            --accent: #fbc14e; /* Gold (transaction_event) */
+            --success: #7dd253; /* Green (staging) */
+            --error: #ff797b; /* Red (external) */
+            
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            
+            --border-radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 20px;
+            color: var(--gray-800);
+        }
+
+        /* --- Navigation Bar (v12.0 Structure) --- */
+        .nav-bar {
+            max-width: 1440px;
+            margin: 0 auto 20px auto;
+            padding: 15px 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 20px;
+            z-index: 1000;
+        }
+        .nav-links { display: flex; flex-wrap: wrap; gap: 10px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--gray-700);
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: var(--transition);
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-link:hover { background: var(--primary-light); color: var(--primary-dark); }
+        .nav-link.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3); }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-dark);
+        }
+        .page-header h1 { 
+            font-size: 2.8em; 
+            margin-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .process-description {
+            max-width: 1440px;
+            margin: 0 auto 30px auto;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px 25px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--accent); /* M2 Accent (Gold) */
+        }
+        .process-description h4 {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .process-description p { font-size: 0.95em; color: var(--gray-600); line-height: 1.6; }
+
+        .module-container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .process-step {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        /* --- Mermaid-inspired step colors & naming --- */
+        .process-step.step-doc { border-top: 5px solid var(--secondary); } /* Purple */
+        .process-step.step-doc-draft { border-top: 5px dashed var(--secondary); } /* Purple, dashed */
+        .process-step.step-event { border-top: 5px solid var(--accent); } /* Gold/Yellow */
+        .process-step.step-staging { border-top: 5px solid var(--success); } /* Green */
+
+        .process-step h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* Icon Colors to match step type */
+        .process-step.step-doc h2 i,
+        .process-step.step-doc-draft h2 i { color: var(--secondary); }
+        .process-step.step-event h2 i { color: var(--accent); }
+        .process-step.step-staging h2 i { color: var(--success); }
+
+        .process-step > p {
+            font-size: 0.95em;
+            color: var(--gray-600);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            max-width: 900px;
+        }
+        
+        .vertical-separator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0px auto 25px auto;
+            color: var(--gray-400);
+        }
+        .vertical-separator i { font-size: 1.5rem; }
+        .vertical-separator span {
+            font-size: 0.9em; 
+            color: var(--gray-700);
+            background: white; 
+            padding: 5px 10px;
+            border-radius: 6px;
+            box-shadow: var(--shadow);
+            white-space: nowrap;
+            margin-top: 10px;
+        }
+
+        .event-card-content {
+            background: var(--gray-50); 
+            padding: 15px 20px; 
+            border-radius: 8px; 
+            font-size: 0.9em; 
+            border-left: 3px solid var(--accent);
+        }
+        .event-card-content p { margin: 0; padding: 0; line-height: 1.8; color: var(--gray-700); }
+        .event-card-content i { color: var(--accent); width: 20px; }
+
+        /* --- Data Table Styling --- */
+        .data-table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+        }
+        .data-table {
+            width: 100%;
+            font-size: 0.85em;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            background: var(--gray-50);
+            padding: 10px 8px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--gray-200);
+            font-size: 0.8em;
+            color: var(--gray-700);
+            position: sticky; top: 0; z-index: 1; /* Sticky header for scroll */
+            white-space: nowrap;
+            text-align: left;
+        }
+        .data-table td {
+            padding: 8px 8px;
+            border-bottom: 1px solid var(--gray-100);
+            white-space: nowrap; 
+        }
+        .data-table tr:nth-child(even) { background: var(--gray-50); }
+        .data-table tr:hover { background: var(--primary-light); }
+        
+        .key-label { 
+            font-size: 0.75rem; font-weight: 600; display: inline-block; 
+            margin-left: 4px; padding: 2px 6px; border-radius: 4px;
+        }
+        .key-label.pk { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
+        .key-label.fk { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+
+        .key-legend {
+            margin-top: 15px; padding: 12px;
+            background: var(--gray-50); border-radius: 8px;
+            font-size: 0.85em;
+            border-left: 3px solid var(--accent); /* Matches event color */
+        }
+        
+        .badge {
+            display: inline-block; padding: 3px 9px;
+            border-radius: 6px; font-size: 0.85em; font-weight: 700;
+            margin-left: 8px;
+        }
+        .badge-h { background: var(--primary-light); color: var(--primary-dark); }
+        .badge-a { background: #fef3c7; color: #92400e; }
+        
+        .row-count {
+            font-size: 0.85em; color: var(--gray-500);
+            margin-top: 15px; font-style: italic;
+            text-align: right;
+        }
+
+        .legend-bottom {
+            margin: 25px 0; padding: 24px; 
+            background: white; border-radius: var(--border-radius); 
+            box-shadow: var(--shadow);
+        }
+        .legend-bottom h3 {
+            margin-bottom: 16px;
+            color: var(--primary-dark);
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-items { display: flex; gap: 30px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <div class="nav-links">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="module1.html" class="nav-link"><i class="fas fa-calendar-alt"></i> M1: Planning</a>
+            <a href="module2.html" class="nav-link"><i class="fas fa-shopping-cart"></i> M2: Procurement</a>
+            <a href="module3.html" class="nav-link"><i class="fas fa-balance-scale"></i> M3: Balancing</a>
+            <a href="module4.html" class="nav-link"><i class="fas fa-truck-loading"></i> M4: Inbound</a>
+            <a href="module5.html" class="nav-link"><i class="fas fa-warehouse"></i> M5: Inventory</a>
+            <a href="module6.html" class="nav-link"><i class="fas fa-clipboard-check"></i> M6: Control</a>
+            <a href="module7.html" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> M7: Finance</a>
+        </div>
+    </div>
+
+    <div class="page-header">
+        <h1><i class="fas fa-shopping-cart" style="color: var(--accent);"></i> MODULE 2: PROCUREMENT</h1>
+    </div>
+
+    <div class="process-description">
+        <h4><i class="fas fa-info-circle"></i> Process Overview (v12.0)</h4>
+        <p>This module handles the **external procurement** process. It is fed the "Net Demand" list from the M3 Balancing Hub.
+        <br><strong>Key Logic:</strong> The PIC (Purchasing-in-Charge) performs Sourcing (who to buy from) and Consolidation (bundling requests) to create the final `Purchase_Order` that is sent to the supplier.</p>
+    </div>
+
+    <div class="module-container">
+
+        <div class="process-step step-doc-draft">
+            <h2><i class="fas fa-clipboard-list"></i> 1. Purchase_Request_Draft</h2>
+            <p>This is the "Net Demand" list (the "Shopping List") generated by the **M3 Balancing Hub**. It serves as the starting point (To-Do List) for the PIC.</p>
+            <div class="data-table-container">
+                <table class="data-table" id="table-pr-draft"></table>
+            </div>
+            <div class="row-count" id="rc-pr-draft">...</div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Input for Download (1:1)</span>
+        </div>
+
+        <div class="process-step step-event">
+            <h2><i class="fas fa-user-tag"></i> 2. Assign_Sourcing (Offline Excel)</h2>
+            <p>This is an offline business event. The PIC downloads the "Draft" list and assigns a `SUPPLIER_ID` to each request based on price, lead time, and capacity.</p>
+            <div class="event-card-content">
+                <p><strong><i class="fas fa-download"></i> Input:</strong> `Purchase_Request_Draft` (Net Demand List)</p>
+                <p><strong><i class="fas fa-link"></i> Refs:</strong> `Supplier_Information` (Master Data)</p>
+                <p><strong><i class="fas fa-user"></i> User:</strong> Chooses the `SUPPLIER_ID` for each line.</p>
+                <p><strong><i class="fas fa-upload"></i> Output:</strong> Enriched file with `SUPPLIER_ID` selected.</p>
+            </div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Generates Upload (1:1)</span>
+        </div>
+
+        <div class="process-step step-staging">
+            <h2><i class="fas fa-database"></i> 3. Purchase_Request_Staging</h2>
+            <p>The Planner's enriched file (now with supplier info) is uploaded to this staging table for validation.</p>
+            <div class="data-table-container">
+                <table class="data-table" id="table-pr-staging"></table>
+            </div>
+            <div class="row-count" id="rc-pr-staging">...</div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Approved (1:1)</span>
+        </div>
+
+        <div class="process-step step-doc">
+            <h2><i class="fas fa-file-check"></i> 4. Purchase_Request_Final <span class="badge badge-h">[H]</span></h2>
+            <p>Once approved, the sourced requests are finalized. This is the "Approved-to-Buy" list, ready for PO consolidation.</p>
+            <div class="data-table-container">
+                <table class="data-table" id="table-pr-final"></table>
+            </div>
+            <div class="row-count" id="rc-pr-final">...</div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Input for (N:1)</span>
+        </div>
+
+        <div class="process-step step-event">
+            <h2><i class="fas fa-object-group"></i> 5. Manual_PO_Consolidation (Offline Excel)</h2>
+            <p>The PIC reviews all "Approved-to-Buy" requests and **consolidates** them. For example, two separate requests for `300010406C` from the *same supplier* (`SUP-A`) are bundled onto a single PO (`PO-100`).</p>
+            <div class="event-card-content">
+                <p><strong><i class="fas fa-download"></i> Input:</strong> `Purchase_Request_Final` (Approved-to-Buy List)</p>
+                <p><strong><i class="fas fa-user"></i> User:</strong> Groups lines by `SUPPLIER_ID` and assigns a `PO_ID`.</p>
+                <p><strong><i class="fas fa-upload"></i> Output:</strong> A list of PO Lines, ready for upload.</p>
+            </div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Generates Upload (1:1)</span>
+        </div>
+
+        <div class="process-step step-staging">
+            <h2><i class="fas fa-database"></i> 6. PO_Upload_Staging</h2>
+            <p>The consolidated POs are uploaded to a staging table for final validation (e.g., checking prices against supplier master).</p>
+            <div class="data-table-container">
+                <table class="data-table" id="table-po-staging"></table>
+            </div>
+            <div class="row-count" id="rc-po-staging">...</div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Approved (1:1)</span>
+        </div>
+        
+        <div class="process-step step-doc">
+            <h2><i class="fas fa-file-invoice"></i> 7. Purchase_Order [H]</h2>
+            <p>This is the **final output of Module 2**: the official Purchase Order sent to the supplier. This PO record triggers two key downstream processes.</p>
+            <div class="data-table-container">
+                <table class="data-table" id="table-po-final"></table>
+            </div>
+            <div class="row-count" id="rc-po-final">...</div>
+        </div>
+        
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span style="background: var(--gray-800); color: white;">Output feeds M3 (Pegging) & triggers M4 (ASN)</span>
+        </div>
+
+        <div class.process-step="legend-bottom">
+            <h3><i class="fas fa-key" style="color:var(--primary);"></i> Data Dictionary</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="key-label pk">(PK)</span> = Primary Key
+                </div>
+                <div class="legend-item">
+                    <span class="key-label fk">(FK)</span> = Foreign Key
+                </div>
+                <div class="legend-item">
+                    <span class="badge badge-h">[H]</span> = Tracks History (SCD2)
+                </div>
+                <div class="legend-item">
+                    <span class="badge badge-a">[A]</span> = Aggregated/Calculated
+                </div>
+            </div>
+        </div>
+
+    </div> <script>
+        // 1. ALL DATA IS STORED HERE (Data flows from M1 -> M3 -> M2)
+        const tsvData = {
+            // This is the Net Demand list from M3, which is M2's input
+            prDraft: `
+PROD_ORDER_ID	VPO	BOM_UPDATE	REQ_DATE	NET_DEMAND
+7271	V2509028C03	300010406C	13-Dec-2025	8040.00
+7269	V2509028C01	300010406C	13-Dec-2025	2602.08
+7272	V2509028C04	300010406C	14-Dec-2025	14040.00
+7272	V2509028C04	40001000A	14-Dec-2025	4590.00
+7273	V2509029C01	300010406C	17-Dec-2025	12667.84
+7273	V2509029C01	40001000A	17-Dec-2025	100.00
+7274	V2509029C02	300010406C	18-Dec-2025	26000.00
+7275	V2509030C01	300010406C	19-Dec-2025	7280.00
+7276	V2509031C01	300010406C	20-Dec-2025	15600.00
+7276	V2509031C01	40001000A	20-Dec-2025	5100.00
+            `,
+            // Step 3: PIC has assigned suppliers
+            prStaging: `
+PROD_ORDER_ID	VPO	BOM_UPDATE	NET_DEMAND	SUPPLIER_ID	VALIDATION
+7271	V2509028C03	300010406C	8040.00	SUP-A	✅ Valid
+7269	V2509028C01	300010406C	2602.08	SUP-A	✅ Valid
+7272	V2509028C04	300010406C	14040.00	SUP-B	✅ Valid
+7272	V2509028C04	40001000A	4590.00	SUP-C	✅ Valid
+7273	V2509029C01	300010406C	12667.84	SUP-B	✅ Valid
+7273	V2509029C01	40001000A	100.00	SUP-C	✅ Valid
+7274	V2509029C02	300010406C	26000.00	SUP-A	✅ Valid
+7275	V2509030C01	300010406C	7280.00	SUP-B	✅ Valid
+7276	V2509031C01	300010406C	15600.00	SUP-A	✅ Valid
+7276	V2509031C01	40001000A	5100.00	SUP-C	✅ Valid
+            `,
+            // Step 4: Approved-to-Buy
+            prFinal: `
+PROD_ORDER_ID	VPO	BOM_UPDATE	NET_DEMAND	SUPPLIER_ID	STATUS
+7271	V2509028C03	300010406C	8040.00	SUP-A	Approved
+7269	V2509028C01	300010406C	2602.08	SUP-A	Approved
+7272	V2509028C04	300010406C	14040.00	SUP-B	Approved
+7272	V2509028C04	40001000A	4590.00	SUP-C	Approved
+7273	V2509029C01	300010406C	12667.84	SUP-B	Approved
+7273	V2509029C01	40001000A	100.00	SUP-C	Approved
+7274	V2509029C02	300010406C	26000.00	SUP-A	Approved
+7275	V2509030C01	3D00010406C	7280.00	SUP-B	Approved
+7276	V2509031C01	300010406C	15600.00	SUP-A	Approved
+7276	V2509031C01	40001000A	5100.00	SUP-C	Approved
+            `,
+            // Step 6: Consolidated POs
+            poStaging: `
+PO_ID	PO_LINE_ID	PROD_ORDER_ID	VPO	BOM_UPDATE	QTY	SUPPLIER_ID	VALIDATION
+PO-100	1	7271	V2509028C03	300010406C	8040.00	SUP-A	✅ Valid
+PO-100	2	7269	V2509028C01	300010406C	2602.08	SUP-A	✅ Valid
+PO-100	3	7274	V2509029C02	300010406C	26000.00	SUP-A	✅ Valid
+PO-100	4	7276	V2509031C01	300010406C	15600.00	SUP-A	✅ Valid
+PO-101	1	7272	V2509028C04	300010406C	14040.00	SUP-B	✅ Valid
+PO-101	2	7273	V2509029C01	300010406C	12667.84	SUP-B	✅ Valid
+PO-101	3	7275	V2509030C01	300010406C	7280.00	SUP-B	✅ Valid
+PO-102	1	7272	V2509028C04	40001000A	4590.00	SUP-C	✅ Valid
+PO-102	2	7273	V2509029C01	40001000A	100.00	SUP-C	✅ Valid
+PO-102	3	7276	V2509031C01	40001000A	5100.00	SUP-C	✅ Valid
+            `,
+            // Step 7: Final POs
+            poFinal: `
+PO_ID	PO_LINE_ID	PROD_ORDER_ID	VPO	BOM_UPDATE	QTY	SUPPLIER_ID	STATUS
+PO-100	1	7271	V2509028C03	300010406C	8040.00	SUP-A	Sent to Supplier
+PO-100	2	7269	V2509028C01	300010406C	2602.08	SUP-A	Sent to Supplier
+PO-100	3	7274	V2509029C02	300010406C	26000.00	SUP-A	Sent to Supplier
+PO-100	4	7276	V2509031C01	300010406C	15600.00	SUP-A	Sent to Supplier
+PO-101	1	7272	V2509028C04	300010406C	14040.00	SUP-B	Sent to Supplier
+PO-101	2	7273	V2509029C01	300010406C	12667.84	SUP-B	Sent to Supplier
+PO-101	3	7275	V2509030C01	300010406C	7280.00	SUP-B	Sent to Supplier
+PO-102	1	7272	V2509028C04	40001000A	4590.00	SUP-C	Sent to Supplier
+PO-1Gas2	2	7273	V2509029C01	40001000A	100.00	SUP-C	Sent to Supplier
+PO-102	3	7276	V2509031C01	40001000A	5100.00	SUP-C	Sent to Supplier
+            `
+        };
+
+        /**
+         * HELPER FUNCTION to render a full table (header + body)
+         */
+        function renderTable(tableId, tsvString, headers, keyConfig, rowCountId, totalRecords) {
+            const tableEl = document.getElementById(tableId);
+            const rowCountEl = document.getElementById(rowCountId);
+            if (!tableEl) return;
+
+            const { data } = parseTSV(tsvString);
+            const displayHeaders = headers;
+            
+            // Generate Header
+            let thead = '<thead><tr>';
+            displayHeaders.forEach(header => {
+                let keyLabel = '';
+                if (keyConfig.pk && keyConfig.pk.includes(header)) keyLabel = ' <span class="key-label pk">(PK)</span>';
+                if (keyConfig.fk && keyConfig.fk.includes(header)) keyLabel = ' <span class="key-label fk">(FK)</span>';
+                
+                let headerText = header.replace(/_/g, ' ');
+                thead += `<th scope="col">${headerText}${keyLabel}</th>`;
+            });
+            thead += '</tr></thead>';
+
+            // Generate Body
+            let tbody = '<tbody>';
+            data.forEach(row => {
+                tbody += `<tr>`;
+                displayHeaders.forEach(header => {
+                    let cellData = row[header] || '';
+                    tbody += `<td>${cellData}</td>`;
+                });
+                tbody += '</tr>';
+            });
+            tbody += '</tbody>';
+
+            // Render table
+            tableEl.innerHTML = thead + tbody;
+
+            // Update row count
+            if (rowCountEl) {
+                const total = totalRecords || data.length;
+                rowCountEl.innerText = `Showing ${data.length} of ${total} records`;
+            }
+        }
+        
+        // Helper to parse TSV
+        function parseTSV(tsv) {
+            const lines = tsv.trim().split('\n');
+            const headers = tsv.trim().split('\n')[0].split('\t').map(h => h.trim());
+            
+            const data = lines.slice(1).map(line => {
+                const values = line.split('\t').map(v => v.trim());
+                const obj = {};
+                headers.forEach((header, i) => {
+                    obj[header] = values[i] ? values[i].replace(/"/g, '') : '';
+                });
+                return obj;
+            });
+            return { headers, data };
+        }
+
+        // 4. RENDER ALL TABLES ON PAGE LOAD
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            renderTable('table-pr-draft', tsvData.prDraft, 
+                ['PROD_ORDER_ID', 'VPO', 'BOM_UPDATE', 'REQ_DATE', 'NET_DEMAND'], 
+                { pk: ['PROD_ORDER_ID', 'BOM_UPDATE'], fk: ['VPO'] }, 'rc-pr-draft', 10);
+
+            renderTable('table-pr-staging', tsvData.prStaging,
+                ['PROD_ORDER_ID', 'VPO', 'BOM_UPDATE', 'NET_DEMAND', 'SUPPLIER_ID', 'VALIDATION'],
+                { pk: ['PROD_ORDER_ID', 'BOM_UPDATE'], fk: ['VPO', 'SUPPLIER_ID'] }, 'rc-pr-staging', 10);
+
+            renderTable('table-pr-final', tsvData.prFinal,
+                ['PROD_ORDER_ID', 'VPO', 'BOM_UPDATE', 'NET_DEMAND', 'SUPPLIER_ID', 'STATUS'],
+                { pk: ['PROD_ORDER_ID', 'BOM_UPDATE'], fk: ['VPO', 'SUPPLIER_ID'] }, 'rc-pr-final', 10);
+
+            renderTable('table-po-staging', tsvData.poStaging,
+                ['PO_ID', 'PO_LINE_ID', 'PROD_ORDER_ID', 'VPO', 'BOM_UPDATE', 'QTY', 'SUPPLIER_ID', 'VALIDATION'],
+                { pk: ['PO_ID', 'PO_LINE_ID'], fk: ['PROD_ORDER_ID', 'VPO', 'BOM_UPDATE', 'SUPPLIER_ID'] }, 'rc-po-staging', 10);
+            
+            renderTable('table-po-final', tsvData.poFinal,
+                ['PO_ID', 'PO_LINE_ID', 'PROD_ORDER_ID', 'VPO', 'BOM_UPDATE', 'QTY', 'SUPPLIER_ID', 'STATUS'],
+                { pk: ['PO_ID', 'PO_LINE_ID'], fk: ['PROD_ORDER_ID', 'VPO', 'BOM_UPDATE', 'SUPPLIER_ID'] }, 'rc-po-final', 10);
+        });
+
+    </script>
+
+</body>
+</html>

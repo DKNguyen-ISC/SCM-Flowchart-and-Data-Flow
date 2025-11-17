@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Flow - M1: Planning</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #dbeafe;
+            
+            /* Mermaid Colors */
+            --secondary: #9562dc; /* Purple (transaction_document) */
+            --accent: #fbc14e; /* Gold (transaction_event) */
+            --success: #7dd253; /* Green (staging) */
+            --error: #ff797b; /* Red (external) */
+            
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            
+            --border-radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 20px;
+            color: var(--gray-800);
+        }
+
+        /* --- Navigation Bar (v12.0 Structure) --- */
+        .nav-bar {
+            max-width: 1440px;
+            margin: 0 auto 20px auto;
+            padding: 15px 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 20px;
+            z-index: 1000;
+        }
+        .nav-links { display: flex; flex-wrap: wrap; gap: 10px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--gray-700);
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: var(--transition);
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-link:hover { background: var(--primary-light); color: var(--primary-dark); }
+        .nav-link.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3); }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-dark);
+        }
+        .page-header h1 { 
+            font-size: 2.8em; 
+            margin-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .process-description {
+            max-width: 1440px;
+            margin: 0 auto 30px auto;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px 25px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--secondary); /* M1 Accent (Purple) */
+        }
+        .process-description h4 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .process-description p { font-size: 0.95em; color: var(--gray-600); line-height: 1.6; }
+
+        .module-container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .process-step {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        /* --- Mermaid-inspired step colors & naming --- */
+        .process-step.step-doc { border-top: 5px solid var(--secondary); } /* Purple */
+        .process-step.step-doc-draft { border-top: 5px dashed var(--secondary); } /* Purple, dashed */
+        .process-step.step-event { border-top: 5px solid var(--accent); } /* Gold/Yellow */
+        .process-step.step-staging { border-top: 5px solid var(--success); } /* Green */
+
+        .process-step h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* Icon Colors to match step type */
+        .process-step.step-doc h2 i,
+        .process-step.step-doc-draft h2 i { color: var(--secondary); }
+        .process-step.step-event h2 i { color: var(--accent); }
+        .process-step.step-staging h2 i { color: var(--success); }
+
+        .process-step > p {
+            font-size: 0.95em;
+            color: var(--gray-600);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            max-width: 900px;
+        }
+        
+        .vertical-separator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0px auto 25px auto;
+            color: var(--gray-400);
+        }
+        .vertical-separator i { font-size: 1.5rem; }
+        .vertical-separator span {
+            font-size: 0.9em; 
+            color: var(--gray-700);
+            background: white; 
+            padding: 5px 10px;
+            border-radius: 6px;
+            box-shadow: var(--shadow);
+            white-space: nowrap;
+            margin-top: 10px;
+        }
+
+        .event-card-content {
+            background: var(--gray-50); 
+            padding: 15px 20px; 
+            border-radius: 8px; 
+            font-size: 0.9em; 
+            border-left: 3px solid var(--accent);
+        }
+        .event-card-content p { margin: 0; padding: 0; line-height: 1.8; color: var(--gray-700); }
+        .event-card-content i { color: var(--accent); width: 20px; }
+
+        /* --- Data Table Styling --- */
+        .data-table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+        }
+        .data-table {
+            width: 100%;
+            font-size: 0.85em;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            background: var(--gray-50);
+            padding: 10px 8px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--gray-200);
+            font-size: 0.8em;
+            color: var(--gray-700);
+            position: sticky; top: 0; z-index: 1; /* Sticky header for scroll */
+            white-space: nowrap;
+            text-align: left;
+        }
+        .data-table td {
+            padding: 8px 8px;
+            border-bottom: 1px solid var(--gray-100);
+            white-space: nowrap; 
+        }
+        .data-table tr:nth-child(even) { background: var(--gray-50); }
+        .data-table tr:hover { background: var(--primary-light); }
+        
+        .key-label { 
+            font-size: 0.75rem; font-weight: 600; display: inline-block; 
+            margin-left: 4px; padding: 2px 6px; border-radius: 4px;
+        }
+        .key-label.pk { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
+        .key-label.fk { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+
+        .key-legend {
+            margin-top: 15px; padding: 12px;
+            background: var(--gray-50); border-radius: 8px;
+            font-size: 0.85em;
+            border-left: 3px solid var(--accent); /* Matches event color */
+        }
+        
+        .badge {
+            display: inline-block; padding: 3px 9px;
+            border-radius: 6px; font-size: 0.85em; font-weight: 700;
+            margin-left: 8px;
+        }
+        .badge-h { background: var(--primary-light); color: var(--primary-dark); }
+        .badge-a { background: #fef3c7; color: #92400e; }
+        
+        .row-count {
+            font-size: 0.85em; color: var(--gray-500);
+            margin-top: 15px; font-style: italic;
+            text-align: right;
+        }
+
+        .legend-bottom {
+            margin: 25px 0; padding: 24px; 
+            background: white; border-radius: var(--border-radius); 
+            box-shadow: var(--shadow);
+        }
+        .legend-bottom h3 {
+            margin-bottom: 16px;
+            color: var(--primary-dark);
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-items { display: flex; gap: 30px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <div class="nav-links">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="module1.html" class="nav-link"><i class="fas fa-calendar-alt"></i> M1: Planning</a>
+            <a href="module2.html" class="nav-link"><i class="fas fa-shopping-cart"></i> M2: Procurement</a>
+            <a href="module3.html" class="nav-link"><i class="fas fa-balance-scale"></i> M3: Balancing</a>
+            <a href="module4.html" class="nav-link"><i class="fas fa-truck-loading"></i> M4: Inbound</a>
+            <a href="module5.html" class="nav-link"><i class="fas fa-warehouse"></i> M5: Inventory</a>
+            <a href="module6.html" class="nav-link"><i class="fas fa-clipboard-check"></i> M6: Control</a>
+            <a href="module7.html" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> M7: Finance</a>
+        </div>
+    </div>
+
+    <div class="page-header">
+        <h1><i class="fas fa-calendar-alt" style="color: var(--secondary);"></i> MODULE 1: PLANNING</h1>
+    </div>
+
+    <div class="process-description">
+        <h4><i class="fas fa-info-circle"></i> Process Overview (v12.0)</h4>
+        <p>This module's responsibility is to generate the **Gross Demand** (the total un-netted material requirement).
+        <br><strong>Key Logic:</strong> It transforms `Production_Orders` into a finalized list of `Material_Demand (Gross)`. This gross list is then sent to the **Module 3 Balancing Hub** to be netted against inventory.</p>
+    </div>
+
+    <div class="module-container">
+
+        <div class="process-step step-doc">
+            <h2><i class="fas fa-industry"></i> 1. Production_Order (Header) <span class="badge badge-h">[H]</span></h2>
+            <p>This is the source document from the production team. It contains the final quantity (`FINISHED_GOODS_ORDER_QUANTITY`) and the critical `REQ_DATE` (which we map from `WORK_IN_PROCESS_START_DATE`).</p>
+            <div class="data-table-container">
+                <table class="data-table" id="table-production-order"></table>
+            </div>
+            <div class="row-count" id="rc-production-order">...</div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Contains (1:N)</span>
+        </div>
+
+        <div class="process-step step-doc-draft">
+            <h2><i class="fas fa-file-alt"></i> 2. Bom_Order_List_Draft</h2>
+            <p>The system generates a draft "Bill of Materials" (BOM) request for each Production Order, listing the generic components needed (e.g., `BOM` code `300010406`).</p>
+            <div class="data-table-container">
+                <table class="data-table" id="table-bom-draft"></table>
+            </div>
+            <div class="row-count" id="rc-bom-draft">...</div>
+        </div>
+        
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Input for Download (1:1)</span>
+        </div>
+
+        <div class="process-step step-event">
+            <h2><i class="fas fa-user-edit"></i> 3. Select_BOM_Update (Offline Excel)</h2>
+            <p>This is an offline business event. The Planner downloads the "Draft" list, consults the master component data, and selects the *exact* component version (`BOM_UPDATE`) to be used (e.g., `300010406C`).</p>
+            <div class="event-card-content">
+                <p><strong><i class="fas fa-download"></i> Input:</strong> `Bom_Order_List_Draft` (BOM Request)</p>
+                <p><strong><i class="fas fa-link"></i> Refs:</strong> `Bom_Data` (Master Component List)</p>
+                <p><strong><i class="fas fa-user"></i> User:</strong> Chooses the exact `BOM_UPDATE` code.</p>
+                <p><strong><i class="fas fa-upload"></i> Output:</strong> Enriched file with `BOM_UPDATE` selected.</p>
+            </div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Generates Upload (1:1)</span>
+        </div>
+
+        <div class="process-step step-staging">
+            <h2><i class="fas fa-database"></i> 4. Bom_Order_List_Staging</h2>
+            <p>The Planner's enriched file is uploaded to this staging table for validation before being finalized.</p>
+            <div class="data-table-container">
+                <table class="data-table" id="table-bom-staging"></table>
+            </div>
+            <div class="row-count" id="rc-bom-staging">...</div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Approved (1:1)</span>
+        </div>
+
+        <div class="process-step step-doc">
+            <h2><i class="fas fa-file-contract"></i> 5. Bom_Order_List_Final <span class="badge badge-h">[H]</span></h2>
+            <p>Once approved, the specific component versions are finalized, creating a permanent record of the intended BOM for each order.</p>
+            <div class="data-table-container">
+                <table class="data-table" id="table-bom-final"></table>
+            </div>
+            <div class="row-count" id="rc-bom-final">...</div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Calculates (1:N)</span>
+        </div>
+        
+        <div class="process-step step-event">
+            <h2><i class="fas fa-calculator"></i> 6. Material_Demand (Gross) <span class="badge badge-a">[A]</span></h2>
+            <p>This is the **final output of Module 1**. The system joins the `Production_Order` (for Qty and Date) with the `Bom_Order_List_Final` (for Consumption) to calculate the total *Gross Demand* for each component, sorted by `REQ_DATE`.</p>
+            <div class="data-table-container">
+                <table class="data-table" id="table-demand-gross"></table>
+            </div>
+            <div class="key-legend">
+                <strong>Formula:</strong> GROSS = ORDER_QTY × CONSUMPTION × (1 + TOLERANCE)
+            </div>
+            <div class="row-count" id="rc-demand-gross">...</div>
+        </div>
+        
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span style="background: var(--gray-800); color: white;">End of M1. Output feeds M3 Balancing Hub</span>
+        </div>
+
+        <div class="legend-bottom">
+            <h3><i class="fas fa-key" style="color:var(--primary);"></i> Data Dictionary</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="key-label pk">(PK)</span> = Primary Key
+                </div>
+                <div class="legend-item">
+                    <span class="key-label fk">(FK)</span> = Foreign Key
+                </div>
+                <div class="legend-item">
+                    <span class="badge badge-h">[H]</span> = Tracks History (SCD2)
+                </div>
+                <div class="legend-item">
+                    <span class="badge badge-a">[A]</span> = Aggregated/Calculated
+                </div>
+            </div>
+        </div>
+
+    </div> <script>
+        // 1. ALL DATA IS STORED HERE (Using expanded dataset)
+        const tsvData = {
+            productionOrder: `
+PRODUCTION_ORDER_ID	CUSTOMER	VPO	PO	SKU_NAME_VERSION	SKU_CODE	SKU_DESCRIPTION	SKU_UNIT	RECEIVED_VPO_DATE	FINISHED_GOODS_ORDER_QUANTITY	REQUEST_FACTORY_FINISHED_DATE	EX_FACTORY_DATE	EXPECTED_TIME_OF_DEPARTURE	WORK_IN_PROCESS_START_DATE	PACKAGE_START_DATE	FINISHED_DATE	ORDER_STATUS
+7269	30090 A.W. Faber Castell	V2509028C01	NA	118036 (Ver-1.2)	110132020	7" Hybrid poplar, 31color...	GROSS	25-Sep-2025	2502	5-Jan-2026	30-Dec-2025	05-Jan-2026	13-Dec-2025	16-Dec-2025	17-Dec-2025	In progress
+7270	30090 A.W. Faber Castell	V2509028C02	NA	118048 (Ver-1.2)	110132031	7" Hybrid poplar, 43color...	GROSS	25-Sep-2025	3348	5-Jan-2026	30-Dec-2025	05-Jan-2026	16-Dec-2025	19-Dec-2025	22-Dec-2025	In progress
+7271	30090 A.W. Faber Castell	V2509028C03	NA	118012 (Ver-1.2)	110067293	7" Hybrid poplar, 12color...	GROSS	25-Sep-2025	4500	29-Dec-2025	30-Dec-2025	05-Jan-2026	13-Dec-2025	16-Dec-2025	19-Dec-2025	In progress
+7272	30090 A.W. Faber Castell	V2509028C04	NA	118024 (Ver-1.2)	110067260	7" Hybrid poplar, 24color...	GROSS	25-Sep-2025	4500	5-Jan-2026	30-Dec-2025	05-Jan-2026	14-Dec-2025	17-Dec-2025	19-Dec-2025	In progress
+7273	30091 Staedtler Mars	V2509029C01	NA	S-185 C24	110067261	Staedtler 24c box...	GROSS	26-Sep-2025	5000	6-Jan-2026	31-Dec-2025	06-Jan-2026	17-Dec-2025	20-Dec-2025	23-Dec-2025	In progress
+7274	30091 Staedtler Mars	V2509029C02	NA	S-185 C12	110067262	Staedtler 12c box...	GROSS	26-Sep-2025	10000	6-Jan-2026	31-Dec-2025	06-Jan-2026	18-Dec-2025	21-Dec-2025	24-Dec-2025	In progress
+7275	30090 A.W. Faber Castell	V2509030C01	NA	118048 (Ver-1.2)	110132031	7" Hybrid poplar, 43color...	GROSS	27-Sep-2025	3500	10-Jan-2026	05-Jan-2026	10-Jan-2026	19-Dec-2025	22-Dec-2025	25-Dec-2025	In progress
+7276	30091 Staedtler Mars	V2509031C01	NA	S-185 C24	110067261	Staedtler 24c box...	GROSS	27-Sep-2025	5000	10-Jan-2026	05-Jan-2026	10-Jan-2026	20-Dec-2025	23-Dec-2025	26-Dec-2025	In progress
+            `,
+            bomDraft: `
+PROD_ORDER_ID	VPO	BOM	CONSUMPTION	TOLERANCE	DRAFT_STATUS
+7269	V2509028C01	300010406	1	0.04	Pending Review
+7269	V2509028C01	20001816	0.027778	0.04	Pending Review
+7270	V2509028C02	300010406	2	0.04	Pending Review
+7271	V2509028C03	300010406	3	0.04	Pending Review
+7272	V2509028C04	300010406	3	0.04	Pending Review
+7272	V2509028C04	40001000A	1	0.02	Pending Review
+7273	V2509029C01	300010406	3	0.04	Pending Review
+7273	V2509029C01	40001000A	1	0.02	Pending Review
+7274	V2509029C02	300010406	2.5	0.04	Pending Review
+7275	V2509030C01	300010406	2	0.04	Pending Review
+7276	V2509031C01	300010406	3	0.04	Pending Review
+7276	V2509031C01	40001000A	1	0.02	Pending Review
+            `,
+            bomStaging: `
+PROD_ORDER_ID	VPO	BOM	BOM_UPDATE	VALIDATION
+7269	V2509028C01	300010406	300010406C	✅ Valid
+7269	V2509028C01	20001816	20001816	✅ Valid
+7270	V2509028C02	300010406	300010406C	✅ Valid
+7271	V2509028C03	300010406	300010406C	✅ Valid
+7272	V2509028C04	300010406	300010406C	✅ Valid
+7272	V2509028C04	40001000A	40001000A	✅ Valid
+7273	V2509029C01	300010406	300010406C	✅ Valid
+7273	V2509029C01	40001000A	40001000A	✅ Valid
+7S7274	V2509029C02	300010406	300010406C	✅ Valid
+7275	V2509030C01	300010406	300010406C	✅ Valid
+7276	V2509031C01	300010406	300010406C	✅ Valid
+7276	V2509031C01	40001000A	40001000A	✅ Valid
+            `,
+            bomFinal: `
+PROD_ORDER_ID	VPO	BOM	BOM_UPDATE	STATUS
+7269	V2509028C01	300010406	300010406C	Approved
+7269	V2509028C01	20001816	20001816	Approved
+7270	V2509028C02	300010406	300010406C	Approved
+7271	V2509028C03	300010406	300010406C	Approved
+7272	V2509028C04	300010406	300010406C	Approved
+7272	V2509028C04	40001000A	40001000A	Approved
+7273	V2509029C01	300010406	300010406C	Approved
+7273	V2509029C01	40001000A	40001000A	Approved
+7274	V2509029C02	300010406	300010406C	Approved
+7275	V2509030C01	300010406	300010406C	Approved
+7276	V2509031C01	300010406	300010406C	Approved
+7276	V2509031C01	40001000A	40001000A	Approved
+            `,
+            demandGross: `
+PROD_ORDER_ID	VPO	BOM_UPDATE	PO_QTY	BOM_CONSUMPTION	GROSS_DEMAND	REQ_DATE
+7271	V2509028C03	300010406C	4500	3.0	14040.00	13-Dec-2025
+7269	V2509028C01	300010406C	2502	1.0	2602.08	13-Dec-2025
+7269	V2509028C01	20001816	2502	0.027778	72.42	13-Dec-2025
+7272	V2509028C04	300010406C	4500	3.0	14040.00	14-Dec-2025
+7272	V2509028C04	40001000A	4500	1.0	4590.00	14-Dec-2025
+7270	V2509028C02	300010406C	3348	2.0	7067.84	16-Dec-2025
+7273	V2509029C01	300010406C	5000	3.0	15600.00	17-Dec-2025
+7273	V2509029C01	40001000A	5000	1.0	5100.00	17-Dec-2025
+7274	V2509029C02	300010406C	10000	2.5	26000.00	18-Dec-2025
+7275	V2509030C01	300010406C	3500	2.0	7280.00	19-Dec-2025
+7276	V2509031C01	300010406C	5000	3.0	15600.00	20-Dec-2025
+7276	V2509031C01	40001000A	5000	1.0	5100.00	20-Dec-2025
+            `
+            // v12.0: 'demandBalancing' data removed from this module.
+        };
+
+        /**
+         * HELPER FUNCTION to render a full table (header + body)
+         */
+        function renderTable(tableId, tsvString, headers, keyConfig, rowCountId, totalRecords) {
+            const tableEl = document.getElementById(tableId);
+            const rowCountEl = document.getElementById(rowCountId);
+            if (!tableEl) return;
+
+            const { data } = parseTSV(tsvString);
+            const displayHeaders = headers;
+            
+            // Generate Header
+            let thead = '<thead><tr>';
+            displayHeaders.forEach(header => {
+                let keyLabel = '';
+                // LOGIC FIX: Check if keyConfig.pk is an array and includes header
+                if (keyConfig.pk && keyConfig.pk.includes(header)) keyLabel = ' <span class="key-label pk">(PK)</span>';
+                if (keyConfig.fk && keyConfig.fk.includes(header)) keyLabel = ' <span class="key-label fk">(FK)</span>';
+                
+                let headerText = header.replace(/_/g, ' ');
+                thead += `<th scope="col">${headerText}${keyLabel}</th>`;
+            });
+            thead += '</tr></thead>';
+
+            // Generate Body
+            let tbody = '<tbody>';
+            data.forEach(row => {
+                tbody += `<tr>`;
+                displayHeaders.forEach(header => {
+                    let cellData = row[header] || '';
+                    if (header === 'SKU_DESCRIPTION') {
+                        cellData = cellData.split(' ')[0] + '...';
+                    }
+                    tbody += `<td>${cellData}</td>`;
+                });
+                tbody += '</tr>';
+            });
+            tbody += '</tbody>';
+
+            // Render table
+            tableEl.innerHTML = thead + tbody;
+
+            // Update row count
+            if (rowCountEl) {
+                const total = totalRecords || data.length;
+                rowCountEl.innerText = `Showing ${data.length} of ${total} records`;
+            }
+        }
+        
+        // Helper to parse TSV
+        function parseTSV(tsv) {
+            const lines = tsv.trim().split('\n');
+            const headers = tsv.trim().split('\n')[0].split('\t').map(h => h.trim());
+            
+            const data = lines.slice(1).map(line => {
+                const values = line.split('\t').map(v => v.trim());
+                const obj = {};
+                headers.forEach((header, i) => {
+                    obj[header] = values[i] ? values[i].replace(/"/g, '') : '';
+                });
+                return obj;
+            });
+            return { headers, data };
+        }
+
+        // 4. RENDER ALL TABLES ON PAGE LOAD
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // LOGIC FIX: pk is now an array ['PROD_ORDER_ID']
+            renderTable('table-production-order', tsvData.productionOrder, 
+                ['PROD_ORDER_ID', 'VPO', 'SKU_CODE', 'FINISHED_GOODS_ORDER_QUANTITY', 'WORK_IN_PROCESS_START_DATE', 'ORDER_STATUS'], 
+                { pk: ['PROD_ORDER_ID'], fk: ['VPO'] }, 'rc-production-order', 8);
+
+            // LOGIC FIX: pk is now composite ['PROD_ORDER_ID', 'BOM']
+            renderTable('table-bom-draft', tsvData.bomDraft,
+                ['PROD_ORDER_ID', 'VPO', 'BOM', 'CONSUMPTION', 'TOLERANCE', 'DRAFT_STATUS'],
+                { pk: ['PROD_ORDER_ID', 'BOM'], fk: ['VPO'] }, 'rc-bom-draft', 12);
+
+            // LOGIC FIX: pk is now composite ['PROD_ORDER_ID', 'BOM']
+            renderTable('table-bom-staging', tsvData.bomStaging,
+                ['PROD_ORDER_ID', 'VPO', 'BOM', 'BOM_UPDATE', 'VALIDATION'],
+                { pk: ['PROD_ORDER_ID', 'BOM'], fk: ['VPO', 'BOM_UPDATE'] }, 'rc-bom-staging', 12);
+
+            // LOGIC FIX: pk is now composite ['PROD_ORDER_ID', 'BOM']
+            renderTable('table-bom-final', tsvData.bomFinal,
+                ['PROD_ORDER_ID', 'VPO', 'BOM', 'BOM_UPDATE', 'STATUS'],
+                { pk: ['PROD_ORDER_ID', 'BOM'], fk: ['VPO', 'BOM_UPDATE'] }, 'rc-bom-final', 12);
+
+            // LOGIC FIX: pk is now composite ['PROD_ORDER_ID', 'BOM_UPDATE']
+            renderTable('table-demand-gross', tsvData.demandGross,
+                ['PROD_ORDER_ID', 'VPO', 'BOM_UPDATE', 'PO_QTY', 'BOM_CONSUMPTION', 'GROSS_DEMAND', 'REQ_DATE'],
+                { pk: ['PROD_ORDER_ID', 'BOM_UPDATE'], fk: ['VPO'] }, 'rc-demand-gross', 12);
+            
+        });
+
+    </script>
+
+</body>
+</html>

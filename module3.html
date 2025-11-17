@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Flow - M3: Balancing</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #dbeafe;
+            
+            /* Mermaid Colors */
+            --secondary: #9562dc; /* Purple (transaction_document) */
+            --accent: #fbc14e; /* Gold (transaction_event) */
+            --success: #7dd253; /* Green (staging) - M3 Theme */
+            --error: #ff797b; /* Red (external) */
+            
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            
+            --border-radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 20px;
+            color: var(--gray-800);
+        }
+
+        /* --- Navigation Bar (v12.0 Structure) --- */
+        .nav-bar {
+            max-width: 1440px;
+            margin: 0 auto 20px auto;
+            padding: 15px 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 20px;
+            z-index: 1000;
+        }
+        .nav-links { display: flex; flex-wrap: wrap; gap: 10px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--gray-700);
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: var(--transition);
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-link:hover { background: var(--primary-light); color: var(--primary-dark); }
+        .nav-link.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3); }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-dark);
+        }
+        .page-header h1 { 
+            font-size: 2.8em; 
+            margin-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .process-description {
+            max-width: 1440px;
+            margin: 0 auto 30px auto;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px 25px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--success); /* M3 Accent (Green) */
+        }
+        .process-description h4 {
+            color: var(--success);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .process-description p { font-size: 0.95em; color: var(--gray-600); line-height: 1.6; }
+
+        .module-container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .process-step {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        /* --- Mermaid-inspired step colors & naming --- */
+        .process-step.step-doc { border-top: 5px solid var(--secondary); } /* Purple */
+        .process-step.step-event { border-top: 5px solid var(--accent); } /* Gold/Yellow */
+        .process-step.step-hub { border-top: 5px solid var(--success); } /* Green */
+
+
+        .process-step h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* Icon Colors to match step type */
+        .process-step.step-doc h2 i { color: var(--secondary); }
+        .process-step.step-event h2 i { color: var(--accent); }
+        .process-step.step-hub h2 i { color: var(--success); }
+
+
+        .process-step > p {
+            font-size: 0.95em;
+            color: var(--gray-600);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            max-width: 900px;
+        }
+        
+        .vertical-separator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0px auto 25px auto;
+            color: var(--gray-400);
+        }
+        .vertical-separator i { font-size: 1.5rem; }
+        .vertical-separator span {
+            font-size: 0.9em; 
+            color: var(--gray-700);
+            background: white; 
+            padding: 5px 10px;
+            border-radius: 6px;
+            box-shadow: var(--shadow);
+            white-space: nowrap;
+            margin-top: 10px;
+        }
+
+        .event-card-content {
+            background: var(--gray-50); 
+            padding: 15px 20px; 
+            border-radius: 8px; 
+            font-size: 0.9em; 
+            border-left: 3px solid var(--accent);
+        }
+        .event-card-content p { margin: 0; padding: 0; line-height: 1.8; color: var(--gray-700); }
+        .event-card-content i { color: var(--accent); width: 20px; }
+
+        /* --- Workbench Layout --- */
+        .workbench-layout {
+            display: flex;
+            gap: 25px;
+        }
+        .workbench-column {
+            flex: 1;
+        }
+        .workbench-column h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- Data Table Styling --- */
+        .data-table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+        }
+        .data-table {
+            width: 100%;
+            font-size: 0.85em;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            background: var(--gray-50);
+            padding: 10px 8px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--gray-200);
+            font-size: 0.8em;
+            color: var(--gray-700);
+            position: sticky; top: 0; z-index: 1; /* Sticky header for scroll */
+            white-space: nowrap;
+            text-align: left;
+        }
+        .data-table td {
+            padding: 8px 8px;
+            border-bottom: 1px solid var(--gray-100);
+            white-space: nowrap; 
+        }
+        .data-table tr:nth-child(even) { background: var(--gray-50); }
+        .data-table tr:hover { background: var(--primary-light); }
+        
+        .key-label { 
+            font-size: 0.75rem; font-weight: 600; display: inline-block; 
+            margin-left: 4px; padding: 2px 6px; border-radius: 4px;
+        }
+        .key-label.pk { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
+        .key-label.fk { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+        
+        .badge {
+            display: inline-block; padding: 3px 9px;
+            border-radius: 6px; font-size: 0.85em; font-weight: 700;
+        }
+        .badge-uncovered { background: #fee2e2; color: #b91c1c; }
+        .badge-covered { background: #dcfce7; color: #166534; }
+        .badge-stock { background: #e0e7ff; color: #312e81; }
+        
+        .row-count {
+            font-size: 0.85em; color: var(--gray-500);
+            margin-top: 15px; font-style: italic;
+            text-align: right;
+        }
+
+        .legend-bottom {
+            margin: 25px 0; padding: 24px; 
+            background: white; border-radius: var(--border-radius); 
+            box-shadow: var(--shadow);
+        }
+        .legend-bottom h3 {
+            margin-bottom: 16px;
+            color: var(--primary-dark);
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-items { display: flex; gap: 30px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <div class="nav-links">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="module1.html" class="nav-link"><i class="fas fa-calendar-alt"></i> M1: Planning</a>
+            <a href="module2.html" class="nav-link"><i class="fas fa-shopping-cart"></i> M2: Procurement</a>
+            <a href="module3.html" class="nav-link"><i class="fas fa-balance-scale"></i> M3: Balancing</a>
+            <a href="module4.html" class="nav-link"><i class="fas fa-truck-loading"></i> M4: Inbound</a>
+            <a href="module5.html" class="nav-link"><i class="fas fa-warehouse"></i> M5: Inventory</a>
+            <a href="module6.html" class="nav-link"><i class="fas fa-clipboard-check"></i> M6: Control</a>
+            <a href="module7.html" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> M7: Finance</a>
+        </div>
+    </div>
+
+    <div class="page-header">
+        <h1><i class="fas fa-balance-scale" style="color: var(--success);"></i> MODULE 3: SUPPLY & DEMAND BALANCING</h1>
+    </div>
+
+    <div class="process-description">
+        <h4><i class="fas fa-info-circle"></i> Process Overview (v12.0)</h4>
+        <p>This is the **"Brain"** of the system. This hub consumes Gross Demand (from M1), On-Hand Stock (from L1), and Purchase Orders (from M2) to calculate the true Net Demand.
+        <br><strong>Key Logic:</strong> It uses a **"Soft Pegging"** model. The `Manage_Pegging` workbench allows a PIC to dynamically re-allocate "OnTheWay" supply to meet emergency demands, and the system immediately calculates the consequences.</p>
+    </div>
+
+    <div class="module-container">
+
+        <div class="process-step step-hub">
+            <h2><i class="fas fa-tasks"></i> 1. Balancing & Pegging (Initial State)</h2>
+            <p>The system runs its initial calculation. The **Balancing (left)** table calculates the plan. The **Pegging (right)** table is the "brain" that tells the calculation which POs are "soft-pegged" to which VPOs. Initially, all POs from M2 are pegged 1-to-1.</p>
+            
+            <div class="workbench-layout">
+                <div class="workbench-column">
+                    <h3><i class="fas fa-calculator"></i> Material_Demand_Balancing (Calc)</h3>
+                    <div class="data-table-container">
+                        <table class="data-table" id="table-balancing-initial"></table>
+                    </div>
+                </div>
+                <div class="workbench-column">
+                    <h3><i class="fas fa-link"></i> PURCHASE_ORDER_ID_VPO_Pegging (Link)</h3>
+                    <div class="data-table-container">
+                        <table class="data-table" id="table-pegging-initial"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>"Emergency" - New High-Priority Order Arrives</span>
+        </div>
+
+        <div class="process-step step-event">
+            <h2><i class="fas fa-random"></i> 2. Manage_Pegging (The "Workbench" Event)</h2>
+            <p>This is the "human-in-the-loop" action. An emergency order (`VPO-C05`) for **Dec 15** arrives. The PIC decides to "steal" the supply from `PO-101` (originally for `VPO-C04` on Dec 14) to cover this new, more urgent order.</p>
+            <div class="event-card-content">
+                <p><strong><i class="fas fa-exclamation-triangle"></i> Emergency:</strong> New `VPO-C05` (Req: Dec 15) needs **14,040** units of `300010406C`.</p>
+                <p><strong><i class="fas fa-unlink"></i> Action 1:</strong> PIC *breaks* the peg: `PO-101, L1` (14,040 units) -> `VPO-C04`.</p>
+                <p><strong><i class="fas fa-link"></i> Action 2 (New Peg):</strong> PIC *re-pegs*: `PO-101, L1` (14,040 units) -> `VPO-C05`.</p>
+            </div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>This action updates the Pegging table...</span>
+        </div>
+
+        <div class="process-step step-hub">
+            <h2><i class="fas fa-check-circle"></i> 3. Balancing & Pegging (Updated State)</h2>
+            <p>The system re-calculates the entire plan based on the PIC's change.
+            <br><b>Right Table:</b> The Pegging table now shows `PO-101` is linked to `VPO-C05`.
+            <br><b>Left Table:</b> The Balancing calculation updates. `VPO-C05` (Dec 15) is now <span class="badge badge-covered">Covered</span>, but `VPO-C04` (Dec 14) is now <span class="badge badge-uncovered">Uncovered</span>.</p>
+            
+            <div class="workbench-layout">
+                <div class="workbench-column">
+                    <h3><i class="fas fa-calculator"></i> Updated Balancing (Calc)</h3>
+                    <div class="data-table-container">
+                        <table class="data-table" id="table-balancing-after"></table>
+                    </div>
+                </div>
+                <div class="workbench-column">
+                    <h3><i class="fas fa-link"></i> Updated Pegging (Link)</h3>
+                    <div class="data-table-container">
+                        <table class="data-table" id="table-pegging-after"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="vertical-separator">
+            <i class="fas fa-arrow-down"></i>
+            <span>Generates Final "To-Do List"</span>
+        </div>
+
+        <div class="process-step step-doc-draft">
+            <h2><i class="fas fa-clipboard-list"></i> 4. Final Output to M2 (Purchase_Request_Draft)</h2>
+            <p>This is the **final output of Module 3**. The system filters the updated balancing table to show *only* the lines with a `NET_DEMAND > 0`. This is the true "To-Do List" that is fed back to **Module 2: Procurement**.</p>
+            <p>Notice that `VPO-C04` (the order we "stole" from) is now back on the "to-buy" list.</p>
+            <div class="data-table-container">
+                <table class="data-table" id="table-net-demand-output"></table>
+            </div>
+            <div class="row-count" id="rc-net-demand-output">...</div>
+        </div>
+
+        <div class="legend-bottom">
+            <h3><i class="fas fa-key" style="color:var(--primary);"></i> Data Dictionary</h3>
+            <div class="legend-items">
+                </div>
+        </div>
+
+    </div> <script>
+        // 1. ALL DATA IS STORED HERE
+        const tsvData = {
+            // --- STEP 1: INITIAL STATE ---
+            balancingInitial: `
+REQ_DATE	TYPE	VPO	BOM_UPDATE	GROSS_DEMAND	SUPPLY	STATUS
+12-Dec-2025	SUPPLY	(OnHand)	300010406C	0	6000.00	<span class="badge badge-stock">Available</span>
+12-Dec-2025	SUPPLY	(OnHand)	20001816	0	72.42	<span class="badge badge-stock">Available</span>
+12-Dec-2025	SUPPLY	(OnHand)	40001000A	0	2000.00	<span class="badge badge-stock">Available</span>
+13-Dec-2025	DEMAND	V2509028C03	300010406C	14040.00	0	<span class="badge badge-covered">Covered by PO-100</span>
+13-Dec-2025	DEMAND	V2509028C01	300010406C	2602.08	0	<span class="badge badge-covered">Covered by PO-100</span>
+13-Dec-2025	DEMAND	V2509028C01	20001816	72.42	72.42	<span class="badge badge-covered">Covered by Stock</span>
+14-Dec-2025	DEMAND	V2509028C04	300010406C	14040.00	0	<span class="badge badge-covered">Covered by PO-101</span>
+14-Dec-2025	DEMAND	V2509028C04	40001000A	4590.00	2000.00	<span class="badge badge-covered">Covered by PO-102</span>
+15-Dec-2025	DEMAND	V2509028C05	300010406C	14040.00	0	<span class="badge badge-uncovered">UNCOVERED (New!)</span>
+16-Dec-2025	DEMAND	V2509028C02	300010406C	7067.84	0	<span class="badge badge-uncovered">UNCOVERED</span>
+17-Dec-2025	DEMAND	V2509029C01	300010406C	15600.00	0	<span class="badge badge-covered">Covered by PO-101</span>
+17-Dec-2025	DEMAND	V2509029C01	40001000A	5100.00	0	<span class="badge badge-covered">Covered by PO-102</span>
+18-Dec-2025	DEMAND	V2509029C02	300010406C	26000.00	0	<span class="badge badge-covered">Covered by PO-100</span>
+19-Dec-2025	DEMAND	V2509030C01	300010406C	7280.00	0	<span class="badge badge-covered">Covered by PO-101</span>
+20-Dec-2025	DEMAND	V2509031C01	300010406C	15600.00	0	<span class="badge badge-covered">Covered by PO-100</span>
+20-Dec-2025	DEMAND	V2509031C01	40001000A	5100.00	0	<span class="badge badge-covered">Covered by PO-102</span>
+(PO)	PO-100	(various)	300010406C	0	52242.08	<span class="badge badge-stock">Pegged Supply</span>
+(PO)	PO-101	(various)	300010406C	0	33987.84	<span class="badge badge-stock">Pegged Supply</span>
+(PO)	PO-102	(various)	40001000A	0	9790.00	<span class="badge badge-stock">Pegged Supply</span>
+            `,
+            peggingInitial: `
+PO_ID	PO_LINE_ID	PEGGED_VPO	BOM_UPDATE	PEGGED_QTY
+PO-100	1	V2509028C03	300010406C	8040.00
+PO-100	2	V2509028C01	300010406C	2602.08
+PO-100	3	V2509029C02	300010406C	26000.00
+PO-100	4	V2509031C01	300010406C	15600.00
+PO-101	1	V2509028C04	300010406C	14040.00
+PO-101	2	V2509029C01	300010406C	12667.84
+PO-101	3	V2509030C01	300010406C	7280.00
+PO-102	1	V2509028C04	40001000A	4590.00
+PO-102	2	V2509029C01	40001000A	100.00
+PO-102	3	V2509031C01	40001000A	5100.00
+            `,
+
+            // --- STEP 3: UPDATED STATE ---
+            balancingAfter: `
+REQ_DATE	TYPE	VPO	BOM_UPDATE	GROSS_DEMAND	SUPPLY	STATUS
+12-Dec-2025	SUPPLY	(OnHand)	300010406C	0	6000.00	<span class="badge badge-stock">Available</span>
+12-Dec-2025	SUPPLY	(OnHand)	20001816	0	72.42	<span class="badge badge-stock">Available</span>
+12-Dec-2025	SUPPLY	(OnHand)	40001000A	0	2000.00	<span class="badge badge-stock">Available</span>
+13-Dec-2025	DEMAND	V2509028C03	300010406C	14040.00	0	<span class="badge badge-covered">Covered by PO-100</span>
+13-Dec-2025	DEMAND	V2509028C01	300010406C	2602.08	0	<span class="badge badge-covered">Covered by PO-100</span>
+13-Dec-2025	DEMAND	V2509028C01	20001816	72.42	72.42	<span class="badge badge-covered">Covered by Stock</span>
+14-Dec-2025	DEMAND	V2509028C04	300010406C	14040.00	6000.00	<span class="badge badge-uncovered">UNCOVERED (Stolen!)</span>
+14-Dec-2025	DEMAND	V2509028C04	40001000A	4590.00	2000.00	<span class="badge badge-covered">Covered by PO-102</span>
+15-Dec-2025	DEMAND	V2509028C05	300010406C	14040.00	0	<span class="badge badge-covered">Covered by PO-101</span>
+16-Dec-2025	DEMAND	V2509028C02	300010406C	7067.84	0	<span class="badge badge-uncovered">UNCOVERED</span>
+17-Dec-2025	DEMAND	V2509029C01	300010406C	15600.00	0	<span class="badge badge-covered">Covered by PO-101</span>
+17-Dec-2025	DEMAND	V2509029C01	40001000A	5100.00	0	<span class="badge badge-covered">Covered by PO-102</span>
+18-Dec-2025	DEMAND	V2509029C02	300010406C	26000.00	0	<span class="badge badge-covered">Covered by PO-100</span>
+19-Dec-2025	DEMAND	V2509030C01	300010406C	7280.00	0	<span class="badge badge-covered">Covered by PO-101</span>
+20-Dec-2025	DEMAND	V2509031C01	300010406C	15600.00	0	<span class="badge badge-covered">Covered by PO-100</span>
+20-Dec-2025	DEMAND	V2509031C01	40001000A	5100.00	0	<span class="badge badge-covered">Covered by PO-102</span>
+(PO)	PO-100	(various)	300010406C	0	52242.08	<span class="badge badge-stock">Pegged Supply</span>
+(PO)	PO-101	(various)	300010406C	0	33987.84	<span class="badge badge-stock">Pegged Supply</span>
+(PO)	PO-102	(various)	40001000A	0	9790.00	<span class="badge badge-stock">Pegged Supply</span>
+            `,
+            peggingAfter: `
+PO_ID	PO_LINE_ID	PEGGED_VPO	BOM_UPDATE	PEGGED_QTY
+PO-100	1	V2509028C03	300010406C	8040.00
+PO-100	2	V2509028C01	300010406C	2602.08
+PO-100	3	V2509029C02	300010406C	26000.00
+PO-100	4	V2509031C01	300010406C	15600.00
+PO-101	1	V2509028C05	300010406C	14040.00
+PO-101	2	V2509029C01	300010406C	12667.84
+PO-101	3	V2509030C01	300010406C	7280.00
+PO-102	1	V2509028C04	40001000A	4590.00
+PO-102	2	V2509029C01	40001000A	100.00
+PO-102	3	V2509031C01	40001000A	5100.00
+            `,
+            
+            // --- STEP 4: FINAL OUTPUT ---
+            netDemandOutput: `
+VPO	BOM_UPDATE	REQ_DATE	NET_DEMAND
+V2509028C04	300010406C	14-Dec-2025	8040.00
+V2509028C02	300010406C	16-Dec-2025	7067.84
+            `
+        };
+
+        /**
+         * HELPER FUNCTION to render a full table (header + body)
+         */
+        function renderTable(tableId, tsvString, headers, keyConfig, rowCountId, totalRecords) {
+            const tableEl = document.getElementById(tableId);
+            const rowCountEl = document.getElementById(rowCountId);
+            if (!tableEl) return;
+
+            const { data } = parseTSV(tsvString);
+            const displayHeaders = headers;
+            
+            // Generate Header
+            let thead = '<thead><tr>';
+            displayHeaders.forEach(header => {
+                let keyLabel = '';
+                if (keyConfig.pk && keyConfig.pk.includes(header)) keyLabel = ' <span class="key-label pk">(PK)</span>';
+                if (keyConfig.fk && keyConfig.fk.includes(header)) keyLabel = ' <span class="key-label fk">(FK)</span>';
+                
+                let headerText = header.replace(/_/g, ' ');
+                thead += `<th scope="col">${headerText}${keyLabel}</th>`;
+            });
+            thead += '</tr></thead>';
+
+            // Generate Body
+            let tbody = '<tbody>';
+            data.forEach(row => {
+                // Highlight supply rows
+                let rowStyle = row.TYPE === 'SUPPLY' ? 'background: var(--gray-50); font-style: italic; color: var(--gray-600);' : '';
+                tbody += `<tr style="${rowStyle}">`;
+                displayHeaders.forEach(header => {
+                    let cellData = row[header] || '';
+                    tbody += `<td>${cellData}</td>`;
+                });
+                tbody += '</tr>';
+            });
+            tbody += '</tbody>';
+
+            // Render table
+            tableEl.innerHTML = thead + tbody;
+
+            // Update row count
+            if (rowCountEl) {
+                const total = totalRecords || data.length;
+                rowCountEl.innerText = `Showing ${data.length} of ${total} records`;
+            }
+        }
+        
+        // Helper to parse TSV
+        function parseTSV(tsv) {
+            const lines = tsv.trim().split('\n');
+            const headers = tsv.trim().split('\n')[0].split('\t').map(h => h.trim());
+            
+            const data = lines.slice(1).map(line => {
+                const values = line.split('\t').map(v => v.trim());
+                const obj = {};
+                headers.forEach((header, i) => {
+                    obj[header] = values[i] ? values[i].replace(/"/g, '') : '';
+                });
+                return obj;
+            });
+            return { headers, data };
+        }
+
+        // 4. RENDER ALL TABLES ON PAGE LOAD
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            renderTable('table-balancing-initial', tsvData.balancingInitial, 
+                ['REQ_DATE', 'TYPE', 'VPO', 'BOM_UPDATE', 'GROSS_DEMAND', 'SUPPLY', 'STATUS'], 
+                { fk: ['VPO', 'BOM_UPDATE'] }, 'rc-balancing-initial', 18);
+
+            renderTable('table-pegging-initial', tsvData.peggingInitial,
+                ['PO_ID', 'PO_LINE_ID', 'PEGGED_VPO', 'BOM_UPDATE', 'PEGGED_QTY'],
+                { pk: ['PO_ID', 'PO_LINE_ID'], fk: ['PEGGED_VPO', 'BOM_UPDATE'] }, 'rc-pegging-initial', 10);
+
+            renderTable('table-balancing-after', tsvData.balancingAfter, 
+                ['REQ_DATE', 'TYPE', 'VPO', 'BOM_UPDATE', 'GROSS_DEMAND', 'SUPPLY', 'STATUS'], 
+                { fk: ['VPO', 'BOM_UPDATE'] }, 'rc-balancing-after', 18);
+
+            renderTable('table-pegging-after', tsvData.peggingAfter,
+                ['PO_ID', 'PO_LINE_ID', 'PEGGED_VPO', 'BOM_UPDATE', 'PEGGED_QTY'],
+                { pk: ['PO_ID', 'PO_LINE_ID'], fk: ['PEGGED_VPO', 'BOM_UPDATE'] }, 'rc-pegging-after', 10);
+
+            renderTable('table-net-demand-output', tsvData.netDemandOutput,
+                ['VPO', 'BOM_UPDATE', 'REQ_DATE', 'NET_DEMAND'],
+                { pk: ['VPO', 'BOM_UPDATE'], fk: [] }, 'rc-net-demand-output', 2);
+        });
+
+    </script>
+
+</body>
+</html>
