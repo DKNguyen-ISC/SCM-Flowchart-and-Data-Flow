@@ -7,348 +7,309 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --primary-light: #dbeafe;
+            /* --- Enterprise Theme Palette (Slate/Rose) --- */
+            --bg-app: #f1f5f9;       /* Slate 100 */
+            --bg-card: #ffffff;      /* White */
+            --text-primary: #0f172a; /* Slate 900 */
+            --text-secondary: #475569; /* Slate 600 */
+            --border-light: #e2e8f0;
+            --border-strong: #cbd5e1;
             
-            /* Mermaid Colors */
-            --secondary: #9562dc; /* Purple (transaction_document) */
-            --accent: #fbc14e; /* Gold (transaction_event) */
-            --success: #7dd253; /* Green (staging) */
-            --m4-theme: #f063b0; /* Pink (decision) */
-            --error: #ff797b; /* Red (external) */
+            /* Navigation Colors */
+            --nav-bg: #1e293b;       /* Slate 800 */
+            --nav-text: #f8fafc;     /* Slate 50 */
+            --nav-active: #3b82f6;   /* Blue 500 */
+
+            /* Module Identity (Inbound/QC = Rose) */
+            --module-accent: #e11d48; /* Rose 600 */
+            --module-light: #ffe4e6;  /* Rose 100 */
             
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-400: #9ca3af;
-            --gray-600: #4b5563;
-            --gray-700: #374151;
-            --gray-800: #1f2937;
-            
-            --border-radius: 12px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --transition: all 0.3s ease;
+            /* Flowchart Node Color Mapping */
+            --node-ext: #ef4444;      /* Red (External) */
+            --bg-ext: #fef2f2;
+            --node-event: #d97706;    /* Amber (Event) */
+            --bg-event: #fffbeb;
+            --node-decision: #db2777; /* Pink (Gateway) */
+            --bg-decision: #fdf2f8;
+
+            --radius: 8px;
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            padding: 20px;
-            color: var(--gray-800);
+            font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-primary);
+            padding-bottom: 80px;
         }
 
-        /* --- Navigation Bar (v12.0 Structure) --- */
+        /* --- Navigation --- */
         .nav-bar {
-            max-width: 1440px;
-            margin: 0 auto 20px auto;
-            padding: 15px 20px;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 20px;
-            z-index: 1000;
+            background-color: var(--nav-bg);
+            padding: 0 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: sticky; top: 0; z-index: 100;
         }
-        .nav-links { display: flex; flex-wrap: wrap; gap: 10px; }
+        .nav-container {
+            max-width: 1400px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+            height: 60px;
+        }
+        .nav-brand { font-weight: 700; color: white; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+        .nav-links { display: flex; gap: 5px; }
         .nav-link {
-            text-decoration: none;
-            color: var(--gray-700);
-            font-weight: 600;
-            padding: 8px 12px;
-            border-radius: 6px;
-            transition: var(--transition);
-            font-size: 0.95em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            text-decoration: none; color: #94a3b8; font-weight: 500; font-size: 0.9rem;
+            padding: 8px 12px; border-radius: 4px; transition: all 0.2s;
         }
-        .nav-link:hover { background: var(--primary-light); color: var(--primary-dark); }
-        .nav-link.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3); }
+        .nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+        .nav-link.active { background: var(--nav-active); color: white; }
+
+        /* --- Header --- */
+        .header-section {
+            background: white; border-bottom: 1px solid var(--border-light);
+            padding: 40px 20px; text-align: center; margin-bottom: 40px;
+        }
+        .header-content { max-width: 1200px; margin: 0 auto; }
+        .module-badge {
+            background: var(--module-light); color: var(--module-accent);
+            padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;
+            text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 15px; border: 1px solid #fda4af;
+        }
+        h1 { font-size: 2.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 10px; }
+        .header-desc { color: var(--text-secondary); max-width: 800px; margin: 0 auto; line-height: 1.6; }
+
+        /* --- Layout --- */
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
         
-        .page-header {
-            text-align: center;
+        /* --- Node Cards --- */
+        .step-card {
+            background: var(--bg-card); border-radius: var(--radius);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-card);
+            display: flex; flex-direction: column; overflow: hidden;
             margin-bottom: 30px;
-            color: var(--primary-dark);
-        }
-        .page-header h1 { 
-            font-size: 2.8em; 
-            margin-bottom: 10px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .process-description {
-            max-width: 1440px;
-            margin: 0 auto 30px auto;
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 20px 25px;
-            box-shadow: var(--shadow);
-            border-left: 4px solid var(--m4-theme); /* M4 Accent (Pink) */
-        }
-        .process-description h4 {
-            color: var(--m4-theme);
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .process-description p { font-size: 0.95em; color: var(--gray-600); line-height: 1.6; }
-
-        .module-container {
-            max-width: 1440px;
-            margin: 0 auto;
         }
 
-        .process-step {
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-lg);
-            padding: 25px;
-            margin-bottom: 25px;
-        }
+        /* Node Styles */
+        .node-ext { border-top: 5px dashed var(--node-ext); } 
+        .node-ext .card-header { background: var(--bg-ext); color: #991b1b; border-bottom: 1px dashed #fca5a5; }
         
-        /* --- Mermaid-inspired step colors & naming --- */
-        .process-step.step-doc { border-top: 5px solid var(--secondary); } /* Purple */
-        .process-step.step-event { border-top: 5px solid var(--accent); } /* Gold/Yellow */
-        .process-step.step-decision { border-top: 5px solid var(--m4-theme); } /* Pink */
-        .process-step.step-external { border-top: 5px dashed var(--error); } /* Red, dashed */
+        .node-event { border-top: 5px solid var(--node-event); }
+        .node-event .card-header { background: var(--bg-event); color: var(--node-event); }
 
-        .process-step h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--gray-800);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        /* Icon Colors to match step type */
-        .process-step.step-doc h2 i { color: var(--secondary); }
-        .process-step.step-event h2 i { color: var(--accent); }
-        .process-step.step-decision h2 i { color: var(--m4-theme); }
-        .process-step.step-external h2 i { color: var(--error); }
+        .node-decision { border-top: 5px solid var(--node-decision); }
+        .node-decision .card-header { background: var(--bg-decision); color: var(--node-decision); }
 
-        .process-step > p {
-            font-size: 0.95em;
-            color: var(--gray-600);
-            line-height: 1.6;
-            margin-bottom: 20px;
-            max-width: 900px;
+        .card-header {
+            padding: 15px 20px; border-bottom: 1px solid var(--border-light);
+            display: flex; justify-content: space-between; align-items: center;
         }
-        
-        .vertical-separator {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0px auto 25px auto;
-            color: var(--gray-400);
-        }
-        .vertical-separator i { font-size: 1.5rem; }
-        .vertical-separator span {
-            font-size: 0.9em; 
-            color: var(--gray-700);
-            background: white; 
-            padding: 5px 10px;
-            border-radius: 6px;
-            box-shadow: var(--shadow);
-            white-space: nowrap;
-            margin-top: 10px;
-        }
+        .card-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .card-body { padding: 20px; }
+        .card-desc { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6; }
 
-        .event-card-content {
-            background: var(--gray-50); 
-            padding: 15px 20px; 
-            border-radius: 8px; 
-            font-size: 0.9em; 
-            border-left: 3px solid var(--m4-theme);
+        /* --- Decision Gateway Styling --- */
+        .decision-box {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
         }
-        .event-card-content p { margin: 0; padding: 0; line-height: 1.8; color: var(--gray-700); }
-        .event-card-content i { color: var(--m4-theme); width: 20px; }
+        .decision-path {
+            padding: 20px; border-radius: 8px; border: 1px solid var(--border-light);
+            text-align: center; transition: all 0.2s;
+        }
+        .path-pass { background: #f0fdf4; border-color: #86efac; }
+        .path-pass:hover { box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2); transform: translateY(-2px); }
+        .path-fail { background: #fef2f2; border-color: #fca5a5; }
+        .path-fail:hover { box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); transform: translateY(-2px); }
+        
+        .path-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+        .path-title { font-weight: 700; font-size: 1.1rem; display: block; margin-bottom: 5px; }
+        .path-desc { font-size: 0.9rem; color: var(--text-secondary); }
 
-        /* --- Data Table Styling --- */
-        .data-table-container {
-            max-height: 400px;
-            overflow-y: auto;
-            overflow-x: auto;
-            border: 1px solid var(--gray-200);
-            border-radius: 8px;
+        /* --- Data Tables --- */
+        .table-wrapper { border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; max-height: 350px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th {
+            background: #e2e8f0; color: var(--text-primary); font-weight: 700;
+            padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--border-strong);
+            position: sticky; top: 0; z-index: 10; white-space: nowrap;
         }
-        .data-table {
-            width: 100%;
-            font-size: 0.85em;
-            border-collapse: collapse;
-        }
-        .data-table th {
-            background: var(--gray-50);
-            padding: 10px 8px;
-            font-weight: 600;
-            border-bottom: 2px solid var(--gray-200);
-            font-size: 0.8em;
-            color: var(--gray-700);
-            position: sticky; top: 0; z-index: 1; /* Sticky header for scroll */
-            white-space: nowrap;
-            text-align: left;
-        }
-        .data-table td {
-            padding: 8px 8px;
-            border-bottom: 1px solid var(--gray-100);
-            white-space: nowrap; 
-        }
-        .data-table tr:nth-child(even) { background: var(--gray-50); }
-        .data-table tr:hover { background: var(--primary-light); }
-        
-        .key-label { 
-            font-size: 0.75rem; font-weight: 600; display: inline-block; 
-            margin-left: 4px; padding: 2px 6px; border-radius: 4px;
-        }
-        .key-label.pk { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
-        .key-label.fk { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
-        
-        .badge {
-            display: inline-block; padding: 3px 9px;
-            border-radius: 6px; font-size: 0.85em; font-weight: 700;
-        }
-        .badge-short { background: #fee2e2; color: #b91c1c; }
-        .badge-fail { background: #fee2e2; color: #b91c1c; }
-        .badge-pass { background: #dcfce7; color: #166534; }
-        .badge-ok { background: #dbeafe; color: #1e40af; }
-        
-        .row-count {
-            font-size: 0.85em; color: var(--gray-500);
-            margin-top: 15px; font-style: italic;
-            text-align: right;
-        }
+        td { padding: 8px 12px; border-bottom: 1px solid var(--border-light); color: #334155; white-space: nowrap; }
+        tr:nth-child(even) { background: #f8fafc; }
+        tr:hover { background: #f0f9ff; }
 
-        .legend-bottom {
-            margin: 25px 0; padding: 24px; 
-            background: white; border-radius: var(--border-radius); 
-            box-shadow: var(--shadow);
+        /* --- Flow Connectors --- */
+        .flow-arrow { text-align: center; margin: -15px 0 25px; position: relative; z-index: 1; }
+        .flow-tag {
+            background: white; color: var(--text-secondary); padding: 4px 12px; border-radius: 12px;
+            font-size: 0.75rem; font-weight: 600; display: inline-block;
+            border: 1px solid var(--border-strong); box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .legend-bottom h3 {
-            margin-bottom: 16px;
-            color: var(--primary-dark);
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .flow-line { height: 15px; width: 2px; background: var(--border-strong); margin: 0 auto; }
+        
+        /* --- Badges --- */
+        .pk { background: #fee2e2; color: #991b1b; padding: 1px 4px; border-radius: 3px; font-size: 0.7em; margin-left: 4px; border: 1px solid #fca5a5; }
+        .fk { background: #dbeafe; color: #1e40af; padding: 1px 4px; border-radius: 3px; font-size: 0.7em; margin-left: 4px; border: 1px solid #93c5fd; }
+
+        .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+        .badge-h { background: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
+        
+        /* Status Badges */
+        .badge-ok { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+        .badge-short { background: #fff7ed; color: #c2410c; border: 1px solid #fdba74; }
+        .badge-fail { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+        .row-count { text-align: right; font-size: 0.8rem; color: var(--text-secondary); margin-top: 8px; font-style: italic; }
+
+        /* --- Footer Logic --- */
+        .logic-footer { margin-top: 40px; background: white; border: 1px solid var(--border-light); border-radius: var(--radius); padding: 25px; }
+        .logic-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; margin-top: 15px; }
+        .logic-item h4 { color: var(--module-accent); margin-bottom: 8px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+        .logic-item p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+
+        /* --- Nav Footer --- */
+        .page-footer {
+            max-width: 1400px; margin: 20px auto; padding: 20px;
+            background: white; border-radius: var(--radius); border: 1px solid var(--border-light);
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .legend-items { display: flex; gap: 30px; flex-wrap: wrap; }
-        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .footer-btn { text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .btn-prev { background: var(--bg-app); color: var(--text-secondary); }
+        .btn-next { background: var(--nav-active); color: white; }
 
     </style>
 </head>
 <body>
 
-    <div class="nav-bar">
-        <div class="nav-links">
-            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
-            <a href="module1.html" class="nav-link"><i class="fas fa-calendar-alt"></i> M1: Planning</a>
-            <a href="module2.html" class="nav-link"><i class="fas fa-shopping-cart"></i> M2: Procurement</a>
-            <a href="module3.html" class="nav-link"><i class="fas fa-balance-scale"></i> M3: Balancing</a>
-            <a href="module4.html" class="nav-link"><i class="fas fa-truck-loading"></i> M4: Inbound</a>
-            <a href="module5.html" class="nav-link"><i class="fas fa-warehouse"></i> M5: Inventory</a>
-            <a href="module6.html" class="nav-link"><i class="fas fa-clipboard-check"></i> M6: Control</a>
-            <a href="module7.html" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> M7: Finance</a>
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <div class="nav-brand"><i class="fas fa-cubes"></i> ISC Supply Chain</div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="module1.html" class="nav-link">M1: Planning</a>
+                <a href="module2.html" class="nav-link">M2: Procurement</a>
+                <a href="module3.html" class="nav-link">M3: Balancing</a>
+                <a href="module4.html" class="nav-link active">M4: Inbound</a>
+                <a href="module5.html" class="nav-link">M5: Inventory</a>
+                <a href="module6.html" class="nav-link">M6: Control</a>
+                <a href="module7.html" class="nav-link">M7: Finance</a>
+            </div>
         </div>
+    </nav>
+
+    <section class="header-section">
+        <div class="header-content">
+            <span class="module-badge">Module 4</span>
+            <h1><i class="fas fa-truck-loading"></i> Inbound Logistics & QC</h1>
+            <p class="header-desc">
+                The bridge from the Supplier to the Warehouse. This module strictly separates Quantity Verification (Dock Receipt) from Quality Verification (Inspection), creating a "QC Firewall."
+            </p>
+        </div>
+    </section>
+
+    <div class="container">
+
+        <div class="step-card node-ext">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-file-import"></i> 1. Advanced_Shipping_Notification (ASN)</div>
+                <span class="badge badge-h">[H] External</span>
+            </div>
+            <div class="card-body">
+                <p class="card-desc">Trigger: The Supplier sends a digital packing slip. This updates the Purchase Order status to <code>In-Transit</code> in Module 2.</p>
+                <div class="table-wrapper"><table id="table-asn"></table></div>
+                <div class="row-count" id="rc-asn">...</div>
+            </div>
+        </div>
+
+        <div class="flow-arrow"><div class="flow-line"></div><div class="flow-tag">Triggers Physical Receipt (1:1)</div><div class="flow-line"></div></div>
+
+        <div class="step-card node-event">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-clipboard-check"></i> 2. Dock_Receipt (Quantity Check)</div>
+                <span class="badge badge-ok" style="background:#fffbeb; color:#d97706; border:1px solid #fcd34d;">Business Event</span>
+            </div>
+            <div class="card-body">
+                <p class="card-desc">
+                    <strong>Action:</strong> The truck arrives. Warehouse staff count the boxes. 
+                    <br><strong>Logic:</strong> Line 3 is a <span class="badge badge-short">Short-Shipment</span> (Ordered 26k, Received 25k).
+                </p>
+                <div class="table-wrapper"><table id="table-dock-receipt"></table></div>
+                <div class="row-count" id="rc-dock-receipt">...</div>
+            </div>
+        </div>
+
+        <div class="flow-arrow"><div class="flow-line"></div><div class="flow-tag">Triggers Inspection (1:1)</div><div class="flow-line"></div></div>
+
+        <div class="step-card node-event">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-microscope"></i> 3. Material_Inspection (Quality Check)</div>
+                <span class="badge badge-ok" style="background:#fffbeb; color:#d97706; border:1px solid #fcd34d;">Business Event</span>
+            </div>
+            <div class="card-body">
+                <p class="card-desc">
+                    <strong>Action:</strong> QC Lab tests samples.
+                    <br><strong>Logic:</strong> Line 3 has <span class="badge badge-fail">500 Failures</span>. Only 24,500 passed.
+                </p>
+                <div class="table-wrapper"><table id="table-inspection"></table></div>
+                <div class="row-count" id="rc-inspection">...</div>
+            </div>
+        </div>
+
+        <div class="flow-arrow"><div class="flow-line"></div><div class="flow-tag">Results In (1:1)</div><div class="flow-line"></div></div>
+
+        <div class="step-card node-decision">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-random"></i> 4. QC_Decision (Gateway)</div>
+                <span class="badge badge-ok" style="background:#fdf2f8; color:#db2777; border:1px solid #fbcfe8;">Logic Gate</span>
+            </div>
+            <div class="card-body">
+                <p class="card-desc">The "Firewall." The process splits based on inspection results.</p>
+                
+                <div class="decision-box">
+                    <div class="decision-path path-pass">
+                        <i class="fas fa-check-circle path-icon" style="color:#22c55e;"></i>
+                        <span class="path-title">PASS (24,500 Qty)</span>
+                        <span class="path-desc">Moves to <strong>Module 5: Material_Receipt</strong> (Available Stock).</span>
+                    </div>
+                    <div class="decision-path path-fail">
+                        <i class="fas fa-times-circle path-icon" style="color:#ef4444;"></i>
+                        <span class="path-title">FAIL (500 Qty)</span>
+                        <span class="path-desc">Moves to <strong>Module 5: Stock_Quarantine</strong> (Blocked Stock).</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="logic-footer">
+            <h3 style="margin-bottom: 15px; color:var(--text-primary);"><i class="fas fa-book"></i> Logic & Data Definitions</h3>
+            <div class="logic-grid">
+                <div class="logic-item">
+                    <h4><i class="fas fa-shield-alt"></i> The QC Firewall</h4>
+                    <p>We separate "Counting" (Dock Receipt) from "Inspecting" (Inspection). This ensures that we acknowledge receipt of goods legally (Dock) before declaring them fit for use (Inspection).</p>
+                </div>
+                <div class="logic-item">
+                    <h4><i class="fas fa-exchange-alt"></i> Feedback Loops</h4>
+                    <p><code>Dock_Receipt</code> updates the <code>Purchase_Order</code> in M2 to "Received." This closes the loop on the "In-Transit" status.</p>
+                </div>
+                <div class="logic-item">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Variance Handling</h4>
+                    <p><strong>Short-Shipment:</strong> Detected at Dock (M4 Step 2). <br><strong>Quality Failure:</strong> Detected at Lab (M4 Step 3). <br>Both result in a reduced "Available Qty" in M5.</p>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="page-header">
-        <h1><i class="fas fa-truck-loading" style="color: var(--m4-theme);"></i> MODULE 4: INBOUND & QC</h1>
-    </div>
+    <footer class="page-footer">
+        <a href="module3.html" class="footer-btn btn-prev"><i class="fas fa-arrow-left"></i> Previous: M3 Balancing</a>
+        <div style="color: var(--text-secondary); font-size: 0.9rem;">ISC Data Engineering • v15.5 Simulation</div>
+        <a href="module5.html" class="footer-btn btn-next">Next: M5 Inventory <i class="fas fa-arrow-right"></i></a>
+    </footer>
 
-    <div class="process-description">
-        <h4><i class="fas fa-info-circle"></i> Process Overview (v13.0)</h4>
-        <p>This module is the **bridge from digital to physical**. It manages the physical receipt of goods from suppliers.
-        <br><strong>Key Logic:</strong> It separates the **Quantity Check** (at the dock) from the **Quality Check** (in the lab). This creates a "QC Firewall" to ensure only inspected, usable stock becomes available for planning in Module 3.</p>
-    </div>
-
-    <div class="module-container">
-
-        <div class="process-step step-external">
-            <h2><i class="fas fa-box-open"></i> 1. Advanced_Shipping_Notification (ASN) <span class="badge badge-h">[H]</span></h2>
-            <p>This is the **trigger** for the inbound process. The supplier sends this document (e.g., packing slip) from M2, telling us what to expect on the truck. We are expecting all 4 lines from `PO-100`.</p>
-            <div class="data-table-container">
-                <table class="data-table" id="table-asn"></table>
-            </div>
-            <div class="row-count" id="rc-asn">...</div>
-        </div>
-
-        <div class="vertical-separator">
-            <i class="fas fa-arrow-down"></i>
-            <span>Triggers Physical Receipt (1:1)</span>
-        </div>
-
-        <div class="process-step step-event">
-            <h2><i class="fas fa-clipboard-check"></i> 2. Inbound_Shipment (Quantity Check)</h2>
-            <p>The truck arrives. The warehouse team counts the physical items and reconciles them against the ASN. This is the **Quantity Check**.
-            <br><b>Exception Scenario:</b> For Line 3, the ASN said 26,000 units, but we only counted **25,000**. This "Short-Shipment" is recorded, and the `Purchase_Order` status is updated immediately.</p>
-            <div class="data-table-container">
-                <table class="data-table" id="table-inbound-shipment"></table>
-            </div>
-            <div class="row-count" id="rc-inbound-shipment">...</div>
-        </div>
-        
-        <div class="vertical-separator">
-            <i class="fas fa-arrow-down"></i>
-            <span>Triggers (1:1)</span>
-        </div>
-
-        <div class="process-step step-event">
-            <h2><i class="fas fa-vial"></i> 3. Material_Inspection (Quality Check)</h2>
-            <p>The items that passed the quantity check (e.g., the 25,000 units from Line 3) are moved to the QC area for a **Quality Check**.
-            <br><b>Exception Scenario:</b> The QC team inspects the 25,000 units and finds that **500** are damaged and fail inspection. This creates a "Pass/Fail" result.</p>
-            <div class="data-table-container">
-                <table class="data-table" id="table-inspection"></table>
-            </div>
-            <div class="row-count" id="rc-inspection">...</div>
-        </div>
-
-        <div class="vertical-separator">
-            <i class="fas fa-arrow-down"></i>
-            <span>Results in (1:1)</span>
-        </div>
-
-        <div class="process-step step-decision">
-            <h2><i class="fas fa-random"></i> 4. QC_Decision (Gateway)</h2>
-            <p>This is the **"Control Gate"** and the end of M4. It is not a table, but a logical "fork in the road" that directs the inventory to Module 5 based on the inspection results. This creates the "QC Firewall."</p>
-            <div class="event-card-content">
-                <p><strong><i class="fas fa-check-circle" style="color:var(--success);"></i> PASS Qty > 0 (24,500 units):</strong>
-                <br>This quantity is now approved. It triggers the `Material_Receipt` event in M5, moving the stock to "Available" status. This is the *only* stock the M3 Balancing Hub can use for planning.</p>
-                <p style="margin-top: 15px;"><strong><i class="fas fa-times-circle" style="color:var(--error);"></i> FAIL Qty > 0 (500 units):</strong>
-                <br>This quantity is rejected. It triggers the `Stock_Quarantine` event in M5. This stock is unavailable and will be returned to the supplier.</p>
-            </div>
-        </div>
-
-        <div class="vertical-separator">
-            <i class="fas fa-arrow-down"></i>
-            <span style="background: var(--gray-800); color: white;">End of M4. Output feeds M5 Inventory</span>
-        </div>
-
-        <div class="legend-bottom">
-            <h3><i class="fas fa-key" style="color:var(--primary);"></i> Data Dictionary</h3>
-            </div>
-
-    </div> <script>
-        // 1. ALL DATA IS STORED HERE
+    <script>
+        // --- DATASETS ---
         const tsvData = {
-            // Step 1: ASN (Expectation from M2's PO-100)
             asn: `
 ASN_ID	PO_ID	PO_LINE_ID	BOM_UPDATE	EXPECTED_QTY
 ASN-700	PO-100	1	300010406C	8040.00
@@ -356,102 +317,68 @@ ASN-700	PO-100	2	300010406C	2602.08
 ASN-700	PO-100	3	300010406C	26000.00
 ASN-700	PO-100	4	300010406C	15600.00
             `,
-            // Step 2: Inbound_Shipment (Physical Count vs. Expectation)
-            inboundShipment: `
-SHIPMENT_ID	ASN_ID	PO_LINE_ID	BOM_UPDATE	EXPECTED_QTY	RECEIVED_QTY	STATUS
-SH-901	ASN-700	1	300010406C	8040.00	8040.00	<span class="badge badge-ok">OK</span>
-SH-901	ASN-700	2	300010406C	2602.08	2602.08	<span class="badge badge-ok">OK</span>
-SH-901	ASN-700	3	300010406C	26000.00	25000.00	<span class="badge badge-short">Short-Shipped</span>
-SH-901	ASN-700	4	300010406C	15600.00	15600.00	<span class="badge badge-ok">OK</span>
+            dockReceipt: `
+RECEIPT_ID	ASN_ID	PO_LINE_ID	BOM_UPDATE	EXP_QTY	RCV_QTY	STATUS
+DR-901	ASN-700	1	300010406C	8040.00	8040.00	<span class="badge badge-ok">Match</span>
+DR-901	ASN-700	2	300010406C	2602.08	2602.08	<span class="badge badge-ok">Match</span>
+DR-901	ASN-700	3	300010406C	26000.00	25000.00	<span class="badge badge-short">Short (-1000)</span>
+DR-901	ASN-700	4	300010406C	15600.00	15600.00	<span class="badge badge-ok">Match</span>
             `,
-            // Step 3: Material_Inspection (Quality Check on what was received)
             inspection: `
-INSPECTION_ID	SHIPMENT_ID	PO_LINE_ID	BOM_UPDATE	INSPECTED_QTY	PASS_QTY	FAIL_QTY	STATUS
-QC-1200	SH-901	1	300010406C	8040.00	8040.00	0.00	<span class="badge badge-pass">Pass</span>
-QC-1200	SH-901	2	300010406C	2602.08	2602.08	0.00	<span class="badge badge-pass">Pass</span>
-QC-1200	SH-901	3	300010406C	25000.00	24500.00	500.00	<span class="badge badge-fail">Partial Fail</span>
-QC-1200	SH-901	4	300010406C	15600.00	15600.00	0.00	<span class="badge badge-pass">Pass</span>
+INSP_ID	RECEIPT_ID	PO_LINE_ID	BOM_UPDATE	RCV_QTY	PASS_QTY	FAIL_QTY	STATUS
+QC-1200	DR-901	1	300010406C	8040.00	8040.00	0.00	<span class="badge badge-ok">Pass</span>
+QC-1200	DR-901	2	300010406C	2602.08	2602.08	0.00	<span class="badge badge-ok">Pass</span>
+QC-1200	DR-901	3	300010406C	25000.00	24500.00	500.00	<span class="badge badge-fail">Fail (500)</span>
+QC-1200	DR-901	4	300010406C	15600.00	15600.00	0.00	<span class="badge badge-ok">Pass</span>
             `
         };
 
-        /**
-         * HELPER FUNCTION to render a full table (header + body)
-         */
-        function renderTable(tableId, tsvString, headers, keyConfig, rowCountId, totalRecords) {
+        // --- RENDER LOGIC ---
+        function renderTable(tableId, tsvString, headers, keyConfig) {
             const tableEl = document.getElementById(tableId);
-            const rowCountEl = document.getElementById(rowCountId);
-            if (!tableEl) return;
+            const lines = tsvString.trim().split('\n');
+            const data = lines.slice(1).map(line => {
+                const vals = line.split('\t').map(v => v.trim());
+                let obj = {};
+                headers.forEach((h, i) => obj[h] = vals[i] || '');
+                return obj;
+            });
 
-            const { data } = parseTSV(tsvString);
-            const displayHeaders = headers;
-            
-            // Generate Header
             let thead = '<thead><tr>';
-            displayHeaders.forEach(header => {
-                let keyLabel = '';
-                if (keyConfig.pk && keyConfig.pk.includes(header)) keyLabel = ' <span class="key-label pk">(PK)</span>';
-                if (keyConfig.fk && keyConfig.fk.includes(header)) keyLabel = ' <span class="key-label fk">(FK)</span>';
-                
-                let headerText = header.replace(/_/g, ' ');
-                thead += `<th scope="col">${headerText}${keyLabel}</th>`;
+            headers.forEach(h => {
+                let badge = '';
+                if (keyConfig.pk && keyConfig.pk.includes(h)) badge = '<span class="pk">PK</span>';
+                if (keyConfig.fk && keyConfig.fk.includes(h)) badge = '<span class="fk">FK</span>';
+                thead += `<th>${h.replace(/_/g, ' ')} ${badge}</th>`;
             });
             thead += '</tr></thead>';
 
-            // Generate Body
             let tbody = '<tbody>';
             data.forEach(row => {
-                tbody += `<tr>`;
-                displayHeaders.forEach(header => {
-                    let cellData = row[header] || '';
-                    tbody += `<td>${cellData}</td>`;
-                });
+                tbody += '<tr>';
+                headers.forEach(h => tbody += `<td>${row[h]}</td>`);
                 tbody += '</tr>';
             });
             tbody += '</tbody>';
 
-            // Render table
             tableEl.innerHTML = thead + tbody;
-
-            // Update row count
-            if (rowCountEl) {
-                const total = totalRecords || data.length;
-                rowCountEl.innerText = `Showing ${data.length} of ${total} records`;
-            }
-        }
-        
-        // Helper to parse TSV
-        function parseTSV(tsv) {
-            const lines = tsv.trim().split('\n');
-            const headers = tsv.trim().split('\n')[0].split('\t').map(h => h.trim());
-            
-            const data = lines.slice(1).map(line => {
-                const values = line.split('\t').map(v => v.trim());
-                const obj = {};
-                headers.forEach((header, i) => {
-                    obj[header] = values[i] ? values[i].replace(/"/g, '') : '';
-                });
-                return obj;
-            });
-            return { headers, data };
+            document.getElementById(tableId.replace('table', 'rc')).innerText = `Showing ${data.length} records`;
         }
 
-        // 4. RENDER ALL TABLES ON PAGE LOAD
         document.addEventListener('DOMContentLoaded', () => {
             
             renderTable('table-asn', tsvData.asn, 
                 ['ASN_ID', 'PO_ID', 'PO_LINE_ID', 'BOM_UPDATE', 'EXPECTED_QTY'], 
-                { pk: ['ASN_ID', 'PO_LINE_ID'], fk: ['PO_ID', 'BOM_UPDATE'] }, 'rc-asn', 4);
+                { pk: ['ASN_ID', 'PO_LINE_ID'], fk: ['PO_ID', 'BOM_UPDATE'] });
 
-            renderTable('table-inbound-shipment', tsvData.inboundShipment,
-                ['SHIPMENT_ID', 'ASN_ID', 'PO_LINE_ID', 'BOM_UPDATE', 'EXPECTED_QTY', 'RECEIVED_QTY', 'STATUS'],
-                { pk: ['SHIPMENT_ID', 'PO_LINE_ID'], fk: ['ASN_ID', 'BOM_UPDATE'] }, 'rc-inbound-shipment', 4);
+            renderTable('table-dock-receipt', tsvData.dockReceipt,
+                ['RECEIPT_ID', 'ASN_ID', 'PO_LINE_ID', 'BOM_UPDATE', 'EXP_QTY', 'RCV_QTY', 'STATUS'],
+                { pk: ['RECEIPT_ID', 'PO_LINE_ID'], fk: ['ASN_ID', 'BOM_UPDATE'] });
 
             renderTable('table-inspection', tsvData.inspection,
-                ['INSPECTION_ID', 'SHIPMENT_ID', 'PO_LINE_ID', 'BOM_UPDATE', 'INSPECTED_QTY', 'PASS_QTY', 'FAIL_QTY', 'STATUS'],
-                { pk: ['INSPECTION_ID', 'PO_LINE_ID'], fk: ['SHIPMENT_ID', 'BOM_UPDATE'] }, 'rc-inspection', 4);
+                ['INSP_ID', 'RECEIPT_ID', 'PO_LINE_ID', 'BOM_UPDATE', 'RCV_QTY', 'PASS_QTY', 'FAIL_QTY', 'STATUS'],
+                { pk: ['INSP_ID', 'PO_LINE_ID'], fk: ['RECEIPT_ID', 'BOM_UPDATE'] });
         });
-
     </script>
-
 </body>
 </html>
